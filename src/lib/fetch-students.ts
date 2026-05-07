@@ -19,16 +19,19 @@ export async function fetchStudents(): Promise<Student[]> {
   const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
   return parsed.data
     .map((row): Student => ({
-      name: pick(row, ["Name", "Student Name", "Full Name"]),
-      phone: pick(row, ["Phone", "Mobile", "Contact", "Phone Number"]),
-      email: pick(row, ["Email", "Email Address"]),
-      pg: pick(row, ["PG", "PG Name", "Selected PG"]),
-      permanentAddress: pick(row, ["Permanent Address", "Address"]),
-      parentName: pick(row, ["Parent Name", "Guardian Name", "Parent/Guardian Name"]),
-      parentAddress: pick(row, ["Parent Address", "Guardian Address"]),
-      parentPhone: pick(row, ["Parent Phone", "Parent Contact", "Guardian Phone"]),
-      parentEmail: pick(row, ["Parent Email", "Guardian Email"]),
-      paymentMode: pick(row, ["Payment Mode", "Payment Option", "Payment"]),
+      timestamp: pick(row, ["Timestamp"]),
+      name: pick(row, ["Full Name"]),
+      dob: pick(row, ["Date of Birth"]),
+      phone: pick(row, ["Contact Number"]),
+      email: pick(row, ["Email Address"]),
+      permanentAddress: pick(row, ["Permanent Address (Full residential address)"]),
+      parentName: pick(row, ["Parent/Guardian Full Name"]),
+      parentAddress: pick(row, ["Parent/Guardian Address (Full residential address)"]),
+      parentPhone: pick(row, ["Parent/Guardian Contact Number"]),
+      parentEmail: pick(row, ["Parent/Guardian Email Address"]),
+      pg: pick(row, ["Select PG Option"]),
+      declaration: pick(row, ["Declaration of Accuracy and Agreement to Terms"]),
+      paymentMode: "",
     }))
     .filter((s) => s.name);
 }

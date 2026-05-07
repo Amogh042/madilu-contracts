@@ -16,6 +16,7 @@ export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2P
 
 export type Student = {
   name: string;
+  dob: string;
   phone: string;
   email: string;
   pg: string;
@@ -25,6 +26,8 @@ export type Student = {
   parentPhone: string;
   parentEmail: string;
   paymentMode: string;
+  declaration: string;
+  timestamp: string;
 };
 
 export type AgreementData = {

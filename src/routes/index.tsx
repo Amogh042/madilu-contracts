@@ -23,8 +23,9 @@ const HISTORY_KEY = "madilu_agreements_v1";
 const OWNER_KEY = "madilu_owner_defaults_v1";
 
 const emptyStudent: Student = {
-  name: "", phone: "", email: "", pg: "", permanentAddress: "",
-  parentName: "", parentAddress: "", parentPhone: "", parentEmail: "", paymentMode: "",
+  name: "", dob: "", phone: "", email: "", pg: "", permanentAddress: "",
+  parentName: "", parentAddress: "", parentPhone: "", parentEmail: "",
+  paymentMode: "", declaration: "", timestamp: "",
 };
 
 const initialAgreement = (s: Student, owner: { name: string; contact: string }): AgreementData => {
