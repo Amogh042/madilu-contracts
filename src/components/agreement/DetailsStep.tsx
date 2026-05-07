@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { PG_ADDRESSES, PG_LIST, type AgreementData } from "@/lib/pg-data";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
@@ -86,9 +86,8 @@ export function DetailsStep({ data, setData, onBack, onNext }: Props) {
               value={data.pgName || undefined}
               onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "" })}
             >
-              <SelectTrigger className={triggerCls + " h-auto"}>
+              <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
                 <SelectValue placeholder="Select PG…" />
-                <ChevronDown className="h-4 w-4 text-[#D4A853]/80 opacity-100" />
               </SelectTrigger>
               <SelectContent
                 className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl"
