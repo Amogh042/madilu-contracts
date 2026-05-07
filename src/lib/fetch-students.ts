@@ -10,7 +10,7 @@ const pick = (row: Record<string, string>, keys: string[]): string => {
 };
 
 export async function fetchStudents(): Promise<Student[]> {
-  if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL === "PASTE_YOUR_CSV_URL_HERE") {
+  if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.startsWith("PASTE_")) {
     throw new Error("Google Sheet CSV URL not configured. Set GOOGLE_SHEET_CSV_URL in src/lib/pg-data.ts");
   }
   const res = await fetch(GOOGLE_SHEET_CSV_URL);

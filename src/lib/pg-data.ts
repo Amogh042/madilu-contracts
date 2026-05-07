@@ -12,7 +12,7 @@ export const PG_ADDRESSES: Record<string, string> = {
 
 export const PG_LIST = Object.keys(PG_ADDRESSES);
 
-export const GOOGLE_SHEET_CSV_URL = "PASTE_YOUR_CSV_URL_HERE";
+export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSMGMgKmlE7yHTh3hHbz3jBvQvqDJ_igNvzm_4hu_KQvQwPoMfmo-9yTmyNHjf0sFVsN4JtkzRt7r5C/pub?output=csv";
 
 export type Student = {
   name: string;
