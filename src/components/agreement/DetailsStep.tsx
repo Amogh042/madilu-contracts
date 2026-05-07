@@ -1,5 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { PG_ADDRESSES, PG_LIST, type AgreementData } from "@/lib/pg-data";
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from "@/components/ui/select";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 type Props = {
   data: AgreementData;
@@ -16,6 +23,34 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 );
 
 const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
+const triggerCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-all hover:border-[#D4A853]/40 data-[state=open]:border-[#D4A853]/60 data-[placeholder]:text-white/40";
+
+const DateField = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const [open, setOpen] = useState(false);
+  const date = value ? new Date(value) : undefined;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger className={triggerCls}>
+        <span className={value ? "" : "text-white/40"}>
+          {date ? format(date, "dd MMM yyyy") : "Pick a date"}
+        </span>
+        <CalendarIcon className="h-4 w-4 text-[#D4A853]/80" />
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-auto p-0 border-white/10 bg-[#15151b]/95 backdrop-blur-2xl shadow-2xl rounded-2xl overflow-hidden"
+      >
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(d) => { if (d) { onChange(d.toISOString().slice(0,10)); setOpen(false); } }}
+          captionLayout="dropdown"
+          className="bg-transparent text-white"
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 export function DetailsStep({ data, setData, onBack, onNext }: Props) {
   // Auto-fill end date when start date or rent changes
@@ -47,14 +82,28 @@ export function DetailsStep({ data, setData, onBack, onNext }: Props) {
           <h3 className="font-display text-xl text-gold">PG &amp; Payment</h3>
 
           <Field label="PG Name">
-            <select className={inputCls} value={data.pgName}
-              onChange={e => {
-                const pg = e.target.value;
-                setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "" });
-              }}>
-              <option value="" className="bg-[#1a1a1f]">Select PG…</option>
-              {PG_LIST.map(p => <option key={p} value={p} className="bg-[#1a1a1f]">{p}</option>)}
-            </select>
+            <Select
+              value={data.pgName || undefined}
+              onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "" })}
+            >
+              <SelectTrigger className={triggerCls + " h-auto"}>
+                <SelectValue placeholder="Select PG…" />
+                <ChevronDown className="h-4 w-4 text-[#D4A853]/80 opacity-100" />
+              </SelectTrigger>
+              <SelectContent
+                className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl"
+              >
+                {PG_LIST.map(p => (
+                  <SelectItem
+                    key={p}
+                    value={p}
+                    className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]"
+                  >
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
 
           <Field label="PG Address"><input className={inputCls} value={data.pgAddress} onChange={e => update("pgAddress", e.target.value)} /></Field>
@@ -80,8 +129,8 @@ export function DetailsStep({ data, setData, onBack, onNext }: Props) {
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Start Date"><input type="date" className={inputCls} value={data.startDate} onChange={e => update("startDate", e.target.value)} /></Field>
-            <Field label="End Date"><input type="date" className={inputCls} value={data.endDate} onChange={e => update("endDate", e.target.value)} /></Field>
+            <Field label="Start Date"><DateField value={data.startDate} onChange={(v) => update("startDate", v)} /></Field>
+            <Field label="End Date"><DateField value={data.endDate} onChange={(v) => update("endDate", v)} /></Field>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
