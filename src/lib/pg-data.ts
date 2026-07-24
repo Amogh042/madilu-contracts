@@ -1,13 +1,15 @@
 export const PG_ADDRESSES: Record<string, string> = {
-  "Aarna": "Aarna PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Aishwarya": "Aishwarya PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Ambara": "Ambara PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Beeshma": "Beeshma PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Drona": "Drona PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Eeshan": "Eeshan PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Elite": "Elite PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Madilu Rajlee": "Madilu Rajlee PG, Kumaraswamy Layout, Bangalore - 560078",
-  "Madilu Siri": "Madilu Siri PG, Kumaraswamy Layout, Bangalore - 560078",
+  "Madilu Aarna": "#418, 94th Cross, near DSCE Gate 3, Kumarswamy Layout, 1st Stage, Bangalore, 560078",
+  "Madilu Aishwarya": "#246, ABM South City, Beside Dayanand Sagar Medical College, Devaraggahalli, Harohhalli, Bangalore, Karnataka",
+  "Madilu Ambara": "#51, 1st Cross, Next to Anjaneya Temple Kumar Swamy Layout 1st stage, Bengaluru-78",
+  "Madilu Beeshma": "#1626, 50ft main road, opp to Apollo Pharmacy, Kumaraswamy Layout 1st stage, Bengaluru-78",
+  "Madilu Drona": "#71, 3rd cross, GN Halli, Kumaraswamy Layout 1st stage, Bengaluru-78",
+  "Madilu Eeshan": "",
+  "Madilu Elite": "#1651, 1st Main Road, Kumar Swamy Layout 1st stage, Bengaluru-78",
+  "Madilu Pradanya": "",
+  "Madilu Rajlee": "#32/A, 2nd Cross, Near Dayananda Sagar College, Kumar Swamy Layout 1st Stage, Bengaluru-78",
+  "Madilu Sai Siri": "#1570, 9th cross, Kumarswamy layout 1st stage, Bengaluru-78",
+  "Madilu Siri": "#77/1, Shubhapriya Arcade, 4th cross, Kumaraswamy Layout, 1st Stage, Bengaluru-78",
 };
 
 export const PG_LIST = Object.keys(PG_ADDRESSES);
@@ -30,15 +32,29 @@ export type Student = {
   timestamp: string;
 };
 
+export type Instalment = {
+  amount: number;
+  dueDate: string;
+};
+
 export type AgreementData = {
   student: Student;
   ownerName: string;
   ownerContact: string;
+  ownerFatherName: string;
+  ownerAge: string;
+  ownerAddress: string;
+  residentAge: string;
+  residentCollege: string;
+  residentStudentId: string;
+  parentFatherName: string;
+  parentAge: string;
   pgName: string;
   pgAddress: string;
   roomNumber: string;
   monthlyRent: number;
-  paymentMode: "Monthly" | "Annual 1 Instalment" | "Annual 2 Instalments";
+  paymentMode: "Monthly" | "Instalments";
+  instalments?: Instalment[];
   startDate: string;
   endDate: string;
   securityDeposit: number;

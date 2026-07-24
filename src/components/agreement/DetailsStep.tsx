@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { PG_ADDRESSES, PG_LIST, type AgreementData } from "@/lib/pg-data";
+import { PG_ADDRESSES, PG_LIST, type AgreementData, type Instalment } from "@/lib/pg-data";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
@@ -10,9 +10,11 @@ import { Calendar } from "@/components/ui/calendar";
 
 type Props = {
   data: AgreementData;
-  setData: (d: AgreementData) => void;
+  setData: (d: AgreementData | null) => void;
   onBack: () => void;
   onNext: () => void;
+  lockedPg?: string;
+  allowedPgs?: string[];
 };
 
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -52,8 +54,9 @@ const DateField = ({ value, onChange }: { value: string; onChange: (v: string) =
   );
 };
 
-export function DetailsStep({ data, setData, onBack, onNext }: Props) {
-  // Auto-fill end date when start date or rent changes
+export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPgs }: Props) {
+  const effectiveLockedPg = lockedPg || (allowedPgs?.length === 1 ? allowedPgs[0] : undefined);
+  const pgOptions = allowedPgs && allowedPgs.length > 1 ? allowedPgs : PG_LIST;
   useEffect(() => {
     if (data.startDate && !data.endDate) {
       const d = new Date(data.startDate);
@@ -64,68 +67,156 @@ export function DetailsStep({ data, setData, onBack, onNext }: Props) {
 
   const update = <K extends keyof AgreementData>(k: K, v: AgreementData[K]) => setData({ ...data, [k]: v });
 
+  const isMonthly = data.paymentMode === "Monthly";
+  const instalmentCount = data.instalments?.length || 0;
+
+  const hasPaymentAmount = isMonthly
+    ? data.monthlyRent > 0
+    : instalmentCount > 0 && data.instalments!.every(i => i.amount > 0);
+
+  const updateInstalment = (idx: number, field: keyof Instalment, value: number | string) => {
+    const arr = [...(data.instalments || [])];
+    arr[idx] = { ...arr[idx], [field]: value };
+    setData({ ...data, instalments: arr });
+  };
+
+  const setInstalmentCount = (count: number) => {
+    const arr: Instalment[] = [];
+    for (let i = 0; i < count; i++) {
+      arr.push(data.instalments?.[i] || { amount: 0, dueDate: "" });
+    }
+    setData({ ...data, instalments: arr });
+  };
+
   return (
     <div className="glass rounded-3xl p-8 animate-fade-in">
       <div className="mb-6">
         <h2 className="font-display text-3xl font-bold">Agreement Details</h2>
-        <p className="text-white/50 text-sm mt-1">Owner, PG and payment terms</p>
+        <p className="text-white/50 text-sm mt-1">Owner, resident, PG and payment terms</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* Left column — Owner + Resident extra fields */}
         <div className="space-y-5">
-          <h3 className="font-display text-xl text-gold">Owner</h3>
-          <Field label="Owner Name"><input className={inputCls} value={data.ownerName} onChange={e => update("ownerName", e.target.value)} /></Field>
-          <Field label="Owner Contact"><input className={inputCls} value={data.ownerContact} onChange={e => update("ownerContact", e.target.value)} /></Field>
+          <h3 className="font-display text-xl text-gold">Owner (First Party)</h3>
+          <Field label="Proprietor Name"><input className={inputCls} value={data.ownerName} onChange={e => update("ownerName", e.target.value)} placeholder="Full name" /></Field>
+          <Field label="S/o (Father's Name)"><input className={inputCls} value={data.ownerFatherName} onChange={e => update("ownerFatherName", e.target.value)} placeholder="Father's name" /></Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Age"><input className={inputCls} value={data.ownerAge} onChange={e => update("ownerAge", e.target.value)} placeholder="Age" /></Field>
+            <Field label="Contact"><input className={inputCls} value={data.ownerContact} onChange={e => update("ownerContact", e.target.value)} placeholder="Phone" /></Field>
+          </div>
+          <Field label="Address"><input className={inputCls} value={data.ownerAddress} onChange={e => update("ownerAddress", e.target.value)} placeholder="Full address" /></Field>
+
+          <h3 className="font-display text-xl text-gold pt-3">Resident (Second Party)</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Resident Age"><input className={inputCls} value={data.residentAge} onChange={e => update("residentAge", e.target.value)} placeholder="Age" /></Field>
+            <Field label="Student ID"><input className={inputCls} value={data.residentStudentId} onChange={e => update("residentStudentId", e.target.value)} placeholder="ID number" /></Field>
+          </div>
+          <Field label="College Name"><input className={inputCls} value={data.residentCollege} onChange={e => update("residentCollege", e.target.value)} placeholder="College / Institution" /></Field>
+
+          <h3 className="font-display text-xl text-gold pt-3">Parent / Guarantor (Third Party)</h3>
+          <Field label="S/o / D/o (Father's Name)"><input className={inputCls} value={data.parentFatherName} onChange={e => update("parentFatherName", e.target.value)} placeholder="Father's name" /></Field>
+          <Field label="Parent Age"><input className={inputCls} value={data.parentAge} onChange={e => update("parentAge", e.target.value)} placeholder="Age" /></Field>
         </div>
 
+        {/* Right column — PG & Payment */}
         <div className="space-y-5">
           <h3 className="font-display text-xl text-gold">PG &amp; Payment</h3>
 
           <Field label="PG Name">
-            <Select
-              value={data.pgName || undefined}
-              onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "" })}
-            >
-              <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
-                <SelectValue placeholder="Select PG…" />
-              </SelectTrigger>
-              <SelectContent
-                className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl"
+            {effectiveLockedPg ? (
+              <div className={inputCls + " opacity-70 cursor-not-allowed"}>{effectiveLockedPg}</div>
+            ) : (
+              <Select
+                value={data.pgName || undefined}
+                onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "" })}
               >
-                {PG_LIST.map(p => (
-                  <SelectItem
-                    key={p}
-                    value={p}
-                    className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]"
-                  >
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                  <SelectValue placeholder="Select PG…" />
+                </SelectTrigger>
+                <SelectContent
+                  className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl"
+                >
+                  {pgOptions.map(p => (
+                    <SelectItem
+                      key={p}
+                      value={p}
+                      className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]"
+                    >
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </Field>
 
-          <Field label="PG Address"><input className={inputCls} value={data.pgAddress} onChange={e => update("pgAddress", e.target.value)} /></Field>
-          <Field label="Room Number"><input className={inputCls} value={data.roomNumber} onChange={e => update("roomNumber", e.target.value)} /></Field>
+          <Field label="PG Address"><input className={inputCls} value={data.pgAddress} onChange={e => update("pgAddress", e.target.value)} placeholder="Full address" /></Field>
+          <Field label="Room Number"><input className={inputCls} value={data.roomNumber} onChange={e => update("roomNumber", e.target.value)} placeholder="Room no." /></Field>
 
-          <Field label="Monthly Rent (₹)">
-            <input type="number" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
-              onChange={e => {
-                const rent = Number(e.target.value);
-                setData({ ...data, monthlyRent: rent, securityDeposit: rent * 3 });
-              }} />
-          </Field>
-
+          {/* Payment Mode */}
           <Field label="Payment Mode">
-            <div className="grid grid-cols-1 gap-2">
-              {(["Monthly", "Annual 1 Instalment", "Annual 2 Instalments"] as const).map(m => (
+            <div className="grid grid-cols-2 gap-2">
+              {(["Monthly", "Instalments"] as const).map(m => (
                 <label key={m} className={`flex items-center gap-3 cursor-pointer rounded-xl border px-4 py-2.5 text-sm transition-all ${data.paymentMode === m ? "border-[#D4A853] bg-[#D4A853]/10" : "border-white/10 hover:border-white/20"}`}>
-                  <input type="radio" className="accent-[#D4A853]" checked={data.paymentMode === m} onChange={() => update("paymentMode", m)} />
+                  <input type="radio" className="accent-[#D4A853]" checked={data.paymentMode === m} onChange={() => {
+                    setData({
+                      ...data,
+                      paymentMode: m,
+                      monthlyRent: m === "Monthly" ? data.monthlyRent : 0,
+                      instalments: m === "Instalments" ? (data.instalments?.length ? data.instalments : []) : undefined,
+                    });
+                  }} />
                   {m}
                 </label>
               ))}
             </div>
           </Field>
+
+          {/* Dynamic payment fields based on mode */}
+          {isMonthly && (
+            <Field label="Monthly Rent (₹)">
+              <input type="number" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
+                onChange={e => {
+                  const rent = Number(e.target.value);
+                  setData({ ...data, monthlyRent: rent, securityDeposit: rent * 3 });
+                }} placeholder="0" />
+            </Field>
+          )}
+
+          {!isMonthly && (
+            <div className="space-y-4">
+              <Field label="Number of Instalments">
+                <Select
+                  value={instalmentCount > 0 ? String(instalmentCount) : undefined}
+                  onValueChange={(v) => setInstalmentCount(Number(v))}
+                >
+                  <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                    <SelectValue placeholder="Select count…" />
+                  </SelectTrigger>
+                  <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl max-h-[300px]">
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
+                      <SelectItem key={n} value={String(n)} className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              {data.instalments?.map((inst, idx) => (
+                <div key={idx} className="grid grid-cols-2 gap-3">
+                  <Field label={`Instalment ${idx + 1} Amount (₹)`}>
+                    <input type="number" className={inputCls + " font-mono"} value={inst.amount || ""}
+                      onChange={e => updateInstalment(idx, "amount", Number(e.target.value))} placeholder="0" />
+                  </Field>
+                  <Field label="Due Date">
+                    <DateField value={inst.dueDate} onChange={(v) => updateInstalment(idx, "dueDate", v)} />
+                  </Field>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Start Date"><DateField value={data.startDate} onChange={(v) => update("startDate", v)} /></Field>
@@ -133,15 +224,15 @@ export function DetailsStep({ data, setData, onBack, onNext }: Props) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Security Deposit (₹)"><input type="number" className={inputCls + " font-mono"} value={data.securityDeposit || ""} onChange={e => update("securityDeposit", Number(e.target.value))} /></Field>
-            <Field label="Maintenance (₹)"><input type="number" className={inputCls + " font-mono"} value={data.maintenanceCharges || ""} onChange={e => update("maintenanceCharges", Number(e.target.value))} /></Field>
+            <Field label="Security Deposit (₹)"><input type="number" className={inputCls + " font-mono"} value={data.securityDeposit || ""} onChange={e => update("securityDeposit", Number(e.target.value))} placeholder="0" /></Field>
+            <Field label="AMC / Maintenance (₹)"><input type="number" className={inputCls + " font-mono"} value={data.maintenanceCharges || ""} onChange={e => update("maintenanceCharges", Number(e.target.value))} placeholder="0" /></Field>
           </div>
         </div>
       </div>
 
       <div className="flex justify-between mt-8">
         <button onClick={onBack} className="glass glass-hover rounded-xl px-6 py-3 text-sm">← Back</button>
-        <button onClick={onNext} disabled={!data.pgName || !data.monthlyRent || !data.startDate}
+        <button onClick={onNext} disabled={!data.pgName || !hasPaymentAmount || !data.startDate}
           className="btn-gold rounded-xl px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
           Next →
         </button>

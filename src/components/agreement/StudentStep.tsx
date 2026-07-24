@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchStudents } from "@/lib/fetch-students";
+import { PG_LIST } from "@/lib/pg-data";
 import type { Student } from "@/lib/pg-data";
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from "@/components/ui/select";
 
 type Props = {
   selected: Student | null;
@@ -8,11 +12,27 @@ type Props = {
   onNext: () => void;
 };
 
+const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
+const triggerCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-all hover:border-[#D4A853]/40 data-[state=open]:border-[#D4A853]/60 data-[placeholder]:text-white/40";
+
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <label className="block">
+    <span className="text-xs uppercase tracking-wider text-white/50 font-medium">{label}</span>
+    <div className="mt-1.5">{children}</div>
+  </label>
+);
+
 export function StudentStep({ selected, onSelect, onNext }: Props) {
+  const [mode, setMode] = useState<"sheet" | "manual">("sheet");
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [manual, setManual] = useState<Student>({
+    name: "", dob: "", phone: "", email: "", pg: "", permanentAddress: "",
+    parentName: "", parentAddress: "", parentPhone: "", parentEmail: "",
+    paymentMode: "", declaration: "", timestamp: "",
+  });
 
   const load = async () => {
     setLoading(true); setError(null);
@@ -35,58 +55,136 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
     );
   }, [q, students]);
 
+  const updateManual = (field: keyof Student, value: string) => {
+    const updated = { ...manual, [field]: value };
+    setManual(updated);
+    onSelect(updated);
+  };
+
+  const manualValid = manual.name.trim().length > 0;
+
   return (
     <div className="glass rounded-3xl p-8 animate-fade-in">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h2 className="font-display text-3xl font-bold">Select Student</h2>
-          <p className="text-white/50 text-sm mt-1">Choose from records synced via Google Sheets</p>
+          <p className="text-white/50 text-sm mt-1">
+            {mode === "sheet" ? "Choose from records synced via Google Sheets" : "Enter student details manually"}
+          </p>
         </div>
-        <button onClick={load} disabled={loading} className="glass glass-hover rounded-xl px-4 py-2 text-sm font-medium">
-          {loading ? "Refreshing…" : "↻ Refresh List"}
-        </button>
+        <div className="flex gap-2">
+          {mode === "sheet" && (
+            <button onClick={load} disabled={loading} className="glass glass-hover rounded-xl px-4 py-2 text-sm font-medium">
+              {loading ? "Refreshing…" : "↻ Refresh List"}
+            </button>
+          )}
+          <button
+            onClick={() => setMode(mode === "sheet" ? "manual" : "sheet")}
+            className="glass glass-hover rounded-xl px-4 py-2 text-sm font-medium"
+          >
+            {mode === "sheet" ? "✎ Enter Manually" : "← Back to List"}
+          </button>
+        </div>
       </div>
 
-      <input
-        value={q} onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by name, phone, email, PG…"
-        className="input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 mb-6"
-      />
+      {mode === "sheet" ? (
+        <>
+          <input
+            value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="Search by name, phone, email, PG…"
+            className="input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 mb-6"
+          />
 
-      {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 p-4 text-sm mb-4">
-          {error} — using empty list. Add a student manually in Step 2 still works once you pick one here, or paste your published CSV URL into <code className="font-mono text-xs">src/lib/pg-data.ts</code>.
+          {error && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 p-4 text-sm mb-4">
+              {error}
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-2">
+            {loading && Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="glass rounded-xl p-4 h-24 animate-pulse" />
+            ))}
+            {!loading && filtered.length === 0 && !error && (
+              <div className="col-span-full text-center text-white/40 py-12 text-sm">No students found.</div>
+            )}
+            {filtered.map((s, i) => {
+              const isSel = selected?.name === s.name && selected?.phone === s.phone;
+              return (
+                <button key={i} onClick={() => onSelect(s)}
+                  className={`glass glass-hover rounded-xl p-4 text-left transition-all ${isSel ? "ring-2 ring-[#D4A853]" : ""}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-display text-lg font-semibold truncate">{s.name}</p>
+                      <p className="text-xs text-white/60 mt-0.5 font-mono">{s.phone}</p>
+                      <p className="text-xs text-white/40 mt-0.5 truncate">{s.email}</p>
+                    </div>
+                    {s.pg && <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap">{s.pg}</span>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <h3 className="font-display text-xl text-gold">Student</h3>
+            <Field label="Full Name *">
+              <input className={inputCls} value={manual.name} onChange={e => updateManual("name", e.target.value)} placeholder="Full Name" />
+            </Field>
+            <Field label="Date of Birth">
+              <input className={inputCls} value={manual.dob} onChange={e => updateManual("dob", e.target.value)} placeholder="DD/MM/YYYY" />
+            </Field>
+            <Field label="Contact Number">
+              <input className={inputCls} value={manual.phone} onChange={e => updateManual("phone", e.target.value)} placeholder="Phone number" />
+            </Field>
+            <Field label="Email Address">
+              <input className={inputCls} value={manual.email} onChange={e => updateManual("email", e.target.value)} placeholder="Email" />
+            </Field>
+            <Field label="Permanent Address">
+              <textarea className={inputCls + " min-h-[80px] resize-y"} value={manual.permanentAddress} onChange={e => updateManual("permanentAddress", e.target.value)} placeholder="Full residential address" />
+            </Field>
+            <Field label="PG Option">
+              <Select value={manual.pg || undefined} onValueChange={(v) => updateManual("pg", v)}>
+                <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                  <SelectValue placeholder="Select PG…" />
+                </SelectTrigger>
+                <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl">
+                  {PG_LIST.map(p => (
+                    <SelectItem key={p} value={p} className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-display text-xl text-gold">Parent / Guardian</h3>
+            <Field label="Parent/Guardian Full Name">
+              <input className={inputCls} value={manual.parentName} onChange={e => updateManual("parentName", e.target.value)} placeholder="Full Name" />
+            </Field>
+            <Field label="Parent/Guardian Address">
+              <textarea className={inputCls + " min-h-[80px] resize-y"} value={manual.parentAddress} onChange={e => updateManual("parentAddress", e.target.value)} placeholder="Full residential address" />
+            </Field>
+            <Field label="Parent/Guardian Contact">
+              <input className={inputCls} value={manual.parentPhone} onChange={e => updateManual("parentPhone", e.target.value)} placeholder="Phone number" />
+            </Field>
+            <Field label="Parent/Guardian Email">
+              <input className={inputCls} value={manual.parentEmail} onChange={e => updateManual("parentEmail", e.target.value)} placeholder="Email" />
+            </Field>
+          </div>
         </div>
       )}
 
-      <div className="grid sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-2">
-        {loading && Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="glass rounded-xl p-4 h-24 animate-pulse" />
-        ))}
-        {!loading && filtered.length === 0 && !error && (
-          <div className="col-span-full text-center text-white/40 py-12 text-sm">No students found.</div>
-        )}
-        {filtered.map((s, i) => {
-          const isSel = selected?.name === s.name && selected?.phone === s.phone;
-          return (
-            <button key={i} onClick={() => onSelect(s)}
-              className={`glass glass-hover rounded-xl p-4 text-left transition-all ${isSel ? "ring-2 ring-[#D4A853]" : ""}`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-display text-lg font-semibold truncate">{s.name}</p>
-                  <p className="text-xs text-white/60 mt-0.5 font-mono">{s.phone}</p>
-                  <p className="text-xs text-white/40 mt-0.5 truncate">{s.email}</p>
-                </div>
-                {s.pg && <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap">{s.pg}</span>}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
       <div className="flex justify-end mt-6">
-        <button disabled={!selected} onClick={onNext}
-          className="btn-gold rounded-xl px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+        <button
+          disabled={mode === "sheet" ? !selected : !manualValid}
+          onClick={onNext}
+          className="btn-gold rounded-xl px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           Next →
         </button>
       </div>

@@ -10,33 +10,89 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OwnerLoginRouteImport } from './routes/owner/login'
+import { Route as OwnerDashboardRouteImport } from './routes/owner/dashboard'
+import { Route as ManagerLoginRouteImport } from './routes/manager/login'
+import { Route as ManagerDashboardRouteImport } from './routes/manager/dashboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OwnerLoginRoute = OwnerLoginRouteImport.update({
+  id: '/owner/login',
+  path: '/owner/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnerDashboardRoute = OwnerDashboardRouteImport.update({
+  id: '/owner/dashboard',
+  path: '/owner/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerLoginRoute = ManagerLoginRouteImport.update({
+  id: '/manager/login',
+  path: '/manager/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerDashboardRoute = ManagerDashboardRouteImport.update({
+  id: '/manager/dashboard',
+  path: '/manager/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/manager/dashboard': typeof ManagerDashboardRoute
+  '/manager/login': typeof ManagerLoginRoute
+  '/owner/dashboard': typeof OwnerDashboardRoute
+  '/owner/login': typeof OwnerLoginRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/manager/dashboard': typeof ManagerDashboardRoute
+  '/manager/login': typeof ManagerLoginRoute
+  '/owner/dashboard': typeof OwnerDashboardRoute
+  '/owner/login': typeof OwnerLoginRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/manager/dashboard': typeof ManagerDashboardRoute
+  '/manager/login': typeof ManagerLoginRoute
+  '/owner/dashboard': typeof OwnerDashboardRoute
+  '/owner/login': typeof OwnerLoginRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/manager/dashboard'
+    | '/manager/login'
+    | '/owner/dashboard'
+    | '/owner/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/manager/dashboard'
+    | '/manager/login'
+    | '/owner/dashboard'
+    | '/owner/login'
+  id:
+    | '__root__'
+    | '/'
+    | '/manager/dashboard'
+    | '/manager/login'
+    | '/owner/dashboard'
+    | '/owner/login'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ManagerDashboardRoute: typeof ManagerDashboardRoute
+  ManagerLoginRoute: typeof ManagerLoginRoute
+  OwnerDashboardRoute: typeof OwnerDashboardRoute
+  OwnerLoginRoute: typeof OwnerLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +104,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/owner/login': {
+      id: '/owner/login'
+      path: '/owner/login'
+      fullPath: '/owner/login'
+      preLoaderRoute: typeof OwnerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owner/dashboard': {
+      id: '/owner/dashboard'
+      path: '/owner/dashboard'
+      fullPath: '/owner/dashboard'
+      preLoaderRoute: typeof OwnerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager/login': {
+      id: '/manager/login'
+      path: '/manager/login'
+      fullPath: '/manager/login'
+      preLoaderRoute: typeof ManagerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager/dashboard': {
+      id: '/manager/dashboard'
+      path: '/manager/dashboard'
+      fullPath: '/manager/dashboard'
+      preLoaderRoute: typeof ManagerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ManagerDashboardRoute: ManagerDashboardRoute,
+  ManagerLoginRoute: ManagerLoginRoute,
+  OwnerDashboardRoute: OwnerDashboardRoute,
+  OwnerLoginRoute: OwnerLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
