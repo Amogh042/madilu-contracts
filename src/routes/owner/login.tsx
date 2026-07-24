@@ -4,7 +4,6 @@ import { Background } from "@/components/agreement/Background";
 import { ownerSignIn } from "@/lib/auth";
 
 export const Route = createFileRoute("/owner/login")({
-  head: () => ({ meta: [{ title: "Owner Login — Madilu PG" }] }),
   component: OwnerLogin,
 });
 

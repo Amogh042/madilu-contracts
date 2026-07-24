@@ -5,7 +5,6 @@ import { checkManagerPhone, setManagerPassword, verifyManagerPassword, getManage
 import { setManagerSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/manager/login")({
-  head: () => ({ meta: [{ title: "Manager Login — Madilu PG" }] }),
   component: ManagerLogin,
 });
 

@@ -16,7 +16,6 @@ import { PG_ADDRESSES } from "@/lib/pg-data";
 import type { AgreementData, Student } from "@/lib/pg-data";
 
 export const Route = createFileRoute("/manager/dashboard")({
-  head: () => ({ meta: [{ title: "Manager Dashboard — Madilu PG" }] }),
   component: ManagerDashboard,
 });
 

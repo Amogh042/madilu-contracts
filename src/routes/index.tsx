@@ -2,12 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Background } from "@/components/agreement/Background";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Madilu PG — Agreement Generator" },
-      { name: "description", content: "Premium PG rental agreement generator for Madilu PG accommodations in Bangalore." },
-    ],
-  }),
   component: LandingPage,
 });
 

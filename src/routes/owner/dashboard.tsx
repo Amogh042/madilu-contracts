@@ -29,7 +29,6 @@ import { PG_LIST, PG_ADDRESSES, type AgreementData, type Student } from "@/lib/p
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/owner/dashboard")({
-  head: () => ({ meta: [{ title: "Owner Dashboard — Madilu PG" }] }),
   component: OwnerDashboard,
 });
 
