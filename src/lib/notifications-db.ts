@@ -11,14 +11,13 @@ export type DbNotification = {
   agreement_id: string | null;
 };
 
-export async function fetchNotifications(userType: "manager" | "owner", userId: string) {
-  const { data, error } = await supabase
+export async function fetchNotifications(userType: "manager" | "owner", userId?: string) {
+  let q = supabase
     .from("notifications")
     .select("*")
-    .eq("user_type", userType)
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .eq("user_type", userType);
+  if (userType === "manager" && userId) q = q.eq("user_id", userId);
+  const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
   if (error) throw error;
   return (data || []) as DbNotification[];
 }
@@ -31,13 +30,14 @@ export async function markNotificationRead(id: string) {
   if (error) throw error;
 }
 
-export async function markAllNotificationsRead(userType: "manager" | "owner", userId: string) {
-  const { error } = await supabase
+export async function markAllNotificationsRead(userType: "manager" | "owner", userId?: string) {
+  let q = supabase
     .from("notifications")
     .update({ is_read: true })
     .eq("user_type", userType)
-    .eq("user_id", userId)
     .eq("is_read", false);
+  if (userType === "manager" && userId) q = q.eq("user_id", userId);
+  const { error } = await q;
   if (error) throw error;
 }
 

@@ -11,7 +11,7 @@ import { AgreementStudentPicker } from "@/components/agreement/AgreementStudentP
 import { SecondaryDocPreview } from "@/components/agreement/SecondaryDocPreview";
 import { getManagerSession, clearManagerSession } from "@/lib/auth";
 import { createAgreement, fetchAgreements, updateAgreement, rowToAgreementData, type DbAgreement } from "@/lib/agreements-db";
-import { fetchNotifications, markAllNotificationsRead, type DbNotification } from "@/lib/notifications-db";
+import { fetchNotifications, markAllNotificationsRead, createNotification, type DbNotification } from "@/lib/notifications-db";
 import { PG_ADDRESSES } from "@/lib/pg-data";
 import type { AgreementData, Student } from "@/lib/pg-data";
 
@@ -131,7 +131,14 @@ function ManagerDashboard() {
         await updateAgreement(editingId, d);
         setSuccessMsg("Agreement updated successfully");
       } else {
-        await createAgreement(d, session.id, "pending");
+        const created = await createAgreement(d, session.id, "pending");
+        await createNotification({
+          user_type: "owner",
+          user_id: "owner",
+          title: "New Agreement for Approval",
+          message: `${session.name} created an agreement for ${d.student.name}`,
+          agreement_id: created.id,
+        });
         setSuccessMsg("Agreement submitted for approval");
       }
       setTimeout(() => setSuccessMsg(""), 5000);
