@@ -126,6 +126,8 @@ function ManagerDashboard() {
 
   const handleDone = async (d: AgreementData) => {
     setSaving(true);
+    console.log("[handleDone] session:", session, "editingId:", editingId);
+    console.log("[handleDone] student:", d.student.name, "pg:", d.pgName);
     try {
       if (editingId) {
         await updateAgreement(editingId, d);
@@ -150,10 +152,13 @@ function ManagerDashboard() {
       setEditingId(null);
       setView("home");
     } catch (e) {
-      setErrorMsg(e instanceof Error ? e.message : "Failed to save agreement");
-      setTimeout(() => setErrorMsg(""), 5000);
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[handleDone] error:", e);
+      setErrorMsg(msg);
+      setTimeout(() => setErrorMsg(""), 10000);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleMarkAllRead = async () => {

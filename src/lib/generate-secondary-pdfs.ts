@@ -85,7 +85,7 @@ export function generateExtensionPDF(a: DbAgreement) {
   writeGap();
 
   writeLine(`Ms./Mr. ${blank(a.student_name)}, S/D/o ${blank(a.guardian_name)},`);
-  writeLine(`Age: __________, Occupation: Student,`);
+  writeLine(`Age: ${blank(a.resident_age)}, Occupation: Student,`);
   writeLine(`Mobile: ${blank(a.student_phone)}, Aadhaar No: ____________`);
   writeLine(`Residing in Room No: ${blank(a.room_number)} at Madilu PG Accommodation.`);
   writeLine("Hereinafter called the 'Student / Second Party'.");
