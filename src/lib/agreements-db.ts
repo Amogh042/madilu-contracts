@@ -37,7 +37,6 @@ export type DbAgreement = {
   created_at: string;
   updated_at: string;
   approved_by: string | null;
-  approved_at: string | null;
   rejection_reason: string | null;
 };
 
@@ -188,7 +187,7 @@ export async function fetchAgreements(filters?: { pg_name?: string; manager_id?:
 export async function approveAgreement(id: string, approvedBy: string) {
   const { error } = await supabase
     .from("agreements")
-    .update({ status: "approved", approved_by: approvedBy, approved_at: new Date().toISOString() })
+    .update({ status: "approved", approved_by: approvedBy, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw error;
 }
