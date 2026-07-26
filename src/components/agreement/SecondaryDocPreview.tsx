@@ -33,8 +33,8 @@ function ExtensionPreview({ a }: { a: DbAgreement }) {
 
       <h4 className="font-bold mb-2">AND</h4>
 
-      <p className="mb-1">Ms./Mr. {blank(a.student_name)}, S/D/o {blank(a.parent_name)},</p>
-      <p className="mb-1">Age: {blank(a.resident_age)}, Occupation: Student,</p>
+      <p className="mb-1">Ms./Mr. {blank(a.student_name)}, S/D/o {blank(a.guardian_name)},</p>
+      <p className="mb-1">Age: __________, Occupation: Student,</p>
       <p className="mb-1">Mobile: {blank(a.student_phone)}, Aadhaar No: ____________</p>
       <p className="mb-2">Residing in Room No: {blank(a.room_number)} at Madilu PG Accommodation.</p>
       <p className="mb-3 italic">Hereinafter called the 'Student / Second Party'.</p>

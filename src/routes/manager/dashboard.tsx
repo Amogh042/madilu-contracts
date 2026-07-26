@@ -132,13 +132,17 @@ function ManagerDashboard() {
         setSuccessMsg("Agreement updated successfully");
       } else {
         const created = await createAgreement(d, session.id, "pending");
-        await createNotification({
-          user_type: "owner",
-          user_id: "owner",
-          title: "New Agreement for Approval",
-          message: `${session.name} created an agreement for ${d.student.name}`,
-          agreement_id: created.id,
-        });
+        try {
+          await createNotification({
+            user_type: "owner",
+            user_id: "owner",
+            title: "New Agreement for Approval",
+            message: `${session.name} created an agreement for ${d.student.name}`,
+            agreement_id: created.id,
+          });
+        } catch (notifErr) {
+          console.warn("Notification insert failed (non-blocking):", notifErr);
+        }
         setSuccessMsg("Agreement submitted for approval");
       }
       setTimeout(() => setSuccessMsg(""), 5000);
