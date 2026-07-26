@@ -62,6 +62,7 @@ function ManagerDashboard() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [secondaryDoc, setSecondaryDoc] = useState<DbAgreement | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const loadAgreements = useCallback(async () => {
     if (!session) return;
@@ -128,9 +129,12 @@ function ManagerDashboard() {
     try {
       if (editingId) {
         await updateAgreement(editingId, d);
+        setSuccessMsg("Agreement updated successfully");
       } else {
         await createAgreement(d, session.id, "pending");
+        setSuccessMsg("Agreement submitted for approval");
       }
+      setTimeout(() => setSuccessMsg(""), 5000);
       await loadAgreements();
       setEditingId(null);
       setView("home");
@@ -176,6 +180,12 @@ function ManagerDashboard() {
       </header>
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 pb-20">
+        {successMsg && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 p-3 text-sm mb-4 flex items-center justify-between">
+            <span>{successMsg}</span>
+            <button onClick={() => setSuccessMsg("")} className="text-emerald-300/60 hover:text-emerald-300 ml-3 shrink-0">&times;</button>
+          </div>
+        )}
         {errorMsg && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 p-3 text-sm mb-4 flex items-center justify-between">
             <span>{errorMsg}</span>
@@ -288,7 +298,7 @@ function ManagerDashboard() {
                     </div>
                     <div className="flex gap-2 shrink-0">
                       {a.status === "pending" && <button onClick={() => handleEdit(a)} className="glass glass-hover rounded-lg px-3 py-2 text-xs">Edit</button>}
-                      <button onClick={() => generateAgreementPDF(rowToAgreementData(a))} className="glass glass-hover rounded-lg px-3 py-2 text-xs">PDF</button>
+                      {a.status === "approved" && <button onClick={() => generateAgreementPDF(rowToAgreementData(a))} className="glass glass-hover rounded-lg px-3 py-2 text-xs">PDF</button>}
                     </div>
                   </div>
                 ))}
@@ -343,6 +353,7 @@ function ManagerDashboard() {
                 onDone={() => handleDone(data)}
                 saving={saving}
                 submitLabel={editingId ? "Update Agreement" : "Submit for Approval"}
+                hidePdf
               />
             )}
           </div>

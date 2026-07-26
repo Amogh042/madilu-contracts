@@ -8,6 +8,7 @@ type Props = {
   onDone: () => void;
   saving?: boolean;
   submitLabel?: string;
+  hidePdf?: boolean;
 };
 
 function SectionRenderer({ sections }: { sections: AgreementSection[] }) {
@@ -47,11 +48,11 @@ function SectionRenderer({ sections }: { sections: AgreementSection[] }) {
   );
 }
 
-export function PreviewStep({ data, onBack, onDone, saving, submitLabel }: Props) {
+export function PreviewStep({ data, onBack, onDone, saving, submitLabel, hidePdf }: Props) {
   const mainSections = buildAgreementSections(data);
 
-  const handleDownload = () => {
-    generateAgreementPDF(data);
+  const handleSubmit = () => {
+    if (!hidePdf) generateAgreementPDF(data);
     onDone();
   };
 
@@ -59,7 +60,9 @@ export function PreviewStep({ data, onBack, onDone, saving, submitLabel }: Props
     <div className="glass rounded-3xl p-8 animate-fade-in">
       <div className="mb-6">
         <h2 className="font-display text-3xl font-bold">Agreement Preview</h2>
-        <p className="text-white/50 text-sm mt-1">Review the full agreement before generating the stamp-paper PDF</p>
+        <p className="text-white/50 text-sm mt-1">
+          {hidePdf ? "Review the agreement before submitting for approval" : "Review the full agreement before generating the stamp-paper PDF"}
+        </p>
       </div>
 
       <div className="rounded-2xl bg-[#fdfaf3] text-[#1a1a1a] p-10 max-h-[600px] overflow-y-auto shadow-2xl" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
@@ -71,10 +74,12 @@ export function PreviewStep({ data, onBack, onDone, saving, submitLabel }: Props
       <div className="flex justify-between mt-8 gap-3 flex-wrap">
         <button onClick={onBack} className="glass glass-hover rounded-xl px-6 py-3 text-sm">← Back to Edit</button>
         <div className="flex gap-3">
-          <button onClick={() => generateAgreementPDF(data)} className="glass glass-hover rounded-xl px-6 py-3 text-sm">
-            Download PDF
-          </button>
-          <button onClick={handleDownload} disabled={saving} className="btn-gold rounded-xl px-8 py-3 text-sm font-semibold disabled:opacity-40">
+          {!hidePdf && (
+            <button onClick={() => generateAgreementPDF(data)} className="glass glass-hover rounded-xl px-6 py-3 text-sm">
+              Download PDF
+            </button>
+          )}
+          <button onClick={handleSubmit} disabled={saving} className="btn-gold rounded-xl px-8 py-3 text-sm font-semibold disabled:opacity-40">
             {saving ? "Saving..." : submitLabel || "Download PDF"}
           </button>
         </div>
