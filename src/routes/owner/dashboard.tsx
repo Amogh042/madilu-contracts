@@ -159,11 +159,12 @@ function OwnerDashboard() {
       setSuccessMsg("Agreement approved");
       setTimeout(() => setSuccessMsg(""), 5000);
       await loadAll();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+    } catch (e: unknown) {
+      const err = e as { message?: string; details?: string; hint?: string };
+      const msg = err?.message || JSON.stringify(e);
       console.error("[handleApprove] error:", e);
-      setErrorMsg("Approve failed: " + msg);
-      setTimeout(() => setErrorMsg(""), 10000);
+      setErrorMsg("Approve failed: " + msg + (err?.details ? " — " + err.details : "") + (err?.hint ? " (hint: " + err.hint + ")" : ""));
+      setTimeout(() => setErrorMsg(""), 15000);
     }
   };
 
@@ -236,11 +237,12 @@ function OwnerDashboard() {
       await loadAll();
       setEditingId(null);
       setView("home");
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+    } catch (e: unknown) {
+      const err = e as { message?: string; details?: string; hint?: string };
+      const msg = err?.message || JSON.stringify(e);
       console.error("[handleDone] error:", e);
-      setErrorMsg(msg);
-      setTimeout(() => setErrorMsg(""), 10000);
+      setErrorMsg(msg + (err?.details ? " — " + err.details : ""));
+      setTimeout(() => setErrorMsg(""), 15000);
     } finally {
       setSaving(false);
     }
