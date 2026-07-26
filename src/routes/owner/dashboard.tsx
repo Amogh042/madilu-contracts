@@ -20,7 +20,7 @@ import {
   type DbManager,
 } from "@/lib/managers-db";
 import {
-  fetchNotifications, markAllNotificationsRead,
+  fetchNotifications, markAllNotificationsRead, createNotification,
   type DbNotification,
 } from "@/lib/notifications-db";
 import { fetchTemplate, saveTemplate } from "@/lib/template-db";
@@ -142,8 +142,29 @@ function OwnerDashboard() {
   if (!authed) return null;
 
   const handleApprove = async (id: string) => {
-    await approveAgreement(id, userId);
-    await loadAll();
+    try {
+      await approveAgreement(id, userId);
+      const agreement = agreements.find(a => a.id === id);
+      if (agreement?.manager_id) {
+        try {
+          await createNotification({
+            user_type: "manager",
+            user_id: agreement.manager_id,
+            title: "Agreement Approved",
+            message: `Agreement for ${agreement.student_name} has been approved`,
+            agreement_id: id,
+          });
+        } catch (e) { console.warn("Notification failed:", e); }
+      }
+      setSuccessMsg("Agreement approved");
+      setTimeout(() => setSuccessMsg(""), 5000);
+      await loadAll();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[handleApprove] error:", e);
+      setErrorMsg("Approve failed: " + msg);
+      setTimeout(() => setErrorMsg(""), 10000);
+    }
   };
 
   const handleReject = async () => {
@@ -191,17 +212,38 @@ function OwnerDashboard() {
     try {
       if (editingId) {
         await updateAgreement(editingId, d);
+        await approveAgreement(editingId, userId);
+        const agreement = agreements.find(a => a.id === editingId);
+        if (agreement?.manager_id) {
+          try {
+            await createNotification({
+              user_type: "manager",
+              user_id: agreement.manager_id,
+              title: "Agreement Approved",
+              message: `Agreement for ${d.student.name} has been approved`,
+              agreement_id: editingId,
+            });
+          } catch (e) { console.warn("Notification failed:", e); }
+        }
+        generateAgreementPDF(d);
+        setSuccessMsg("Agreement updated and approved");
       } else {
         await createAgreement(d, null, "approved");
+        generateAgreementPDF(d);
+        setSuccessMsg("Agreement created");
       }
+      setTimeout(() => setSuccessMsg(""), 5000);
       await loadAll();
       setEditingId(null);
       setView("home");
     } catch (e) {
-      setErrorMsg(e instanceof Error ? e.message : "Failed to save agreement");
-      setTimeout(() => setErrorMsg(""), 5000);
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[handleDone] error:", e);
+      setErrorMsg(msg);
+      setTimeout(() => setErrorMsg(""), 10000);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleAddManager = async () => {
@@ -332,6 +374,12 @@ function OwnerDashboard() {
       </header>
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 pb-20">
+        {successMsg && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 p-3 text-sm mb-4 flex items-center justify-between">
+            <span>{successMsg}</span>
+            <button onClick={() => setSuccessMsg("")} className="text-emerald-300/60 hover:text-emerald-300 ml-3 shrink-0">&times;</button>
+          </div>
+        )}
         {errorMsg && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 p-3 text-sm mb-4 flex items-center justify-between">
             <span>{errorMsg}</span>
@@ -653,7 +701,7 @@ function OwnerDashboard() {
                 onBack={() => setStep(1)}
                 onDone={() => handleDone(agreementData)}
                 saving={saving}
-                submitLabel={editingId ? "Update Agreement" : "Create & Approve"}
+                submitLabel={editingId ? "Update & Approve" : "Create & Approve"}
               />
             )}
           </div>
