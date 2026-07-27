@@ -66,6 +66,19 @@ export async function addManager(manager: { name: string; email: string; phone: 
   return data as DbManager;
 }
 
+export async function updateManager(id: string, fields: { name: string; phone: string; email: string; pg_name: string }) {
+  const { error } = await supabase
+    .from("managers")
+    .update(fields)
+    .eq("id", id);
+  if (error) {
+    if (error.message?.includes("duplicate") || error.message?.includes("unique") || error.code === "23505") {
+      throw new Error("This phone number is already assigned to another manager");
+    }
+    throw new Error(error.message || "Failed to update manager");
+  }
+}
+
 export async function toggleManagerActive(id: string, active: boolean) {
   const { error } = await supabase
     .from("managers")

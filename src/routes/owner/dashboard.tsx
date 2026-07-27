@@ -16,7 +16,7 @@ import {
   rowToAgreementData, type DbAgreement,
 } from "@/lib/agreements-db";
 import {
-  fetchManagers, addManager, toggleManagerActive, deleteManager,
+  fetchManagers, addManager, updateManager, toggleManagerActive, deleteManager,
   type DbManager,
 } from "@/lib/managers-db";
 import {
@@ -94,6 +94,8 @@ function OwnerDashboard() {
 
   const [newMgr, setNewMgr] = useState({ name: "", email: "", phone: "", pg_names: [] as string[] });
   const [mgrAdding, setMgrAdding] = useState(false);
+  const [editMgr, setEditMgr] = useState<{ id: string; name: string; email: string; phone: string; pg_names: string[] } | null>(null);
+  const [mgrSaving, setMgrSaving] = useState(false);
 
   const [templateText, setTemplateText] = useState("");
   const [templateStatus, setTemplateStatus] = useState<"" | "saved" | string>("");
@@ -289,6 +291,40 @@ function OwnerDashboard() {
     if (!confirm("Delete this manager?")) return;
     await deleteManager(id);
     await loadAll();
+  };
+
+  const startEditManager = (m: DbManager) => {
+    setEditMgr({
+      id: m.id,
+      name: m.name,
+      phone: m.phone,
+      email: m.email || "",
+      pg_names: m.pg_name.split(",").map(s => s.trim()).filter(Boolean),
+    });
+  };
+
+  const handleSaveManager = async () => {
+    if (!editMgr) return;
+    if (!editMgr.name || !editMgr.phone || editMgr.pg_names.length === 0) return;
+    setMgrSaving(true);
+    try {
+      await updateManager(editMgr.id, {
+        name: editMgr.name,
+        phone: editMgr.phone,
+        email: editMgr.email,
+        pg_name: editMgr.pg_names.join(", "),
+      });
+      setEditMgr(null);
+      setSuccessMsg("Manager updated");
+      setTimeout(() => setSuccessMsg(""), 4000);
+      await loadAll();
+    } catch (e) {
+      const msg = (e as { message?: string })?.message || JSON.stringify(e);
+      setErrorMsg(msg);
+      setTimeout(() => setErrorMsg(""), 10000);
+    } finally {
+      setMgrSaving(false);
+    }
   };
 
   const generateDefaultTemplate = (): string => {
@@ -604,7 +640,38 @@ function OwnerDashboard() {
                 <div className="text-center py-10 text-white/40 text-sm">No managers added yet.</div>
               ) : (
                 <div className="space-y-2">
-                  {managers.map(m => (
+                  {managers.map(m => editMgr?.id === m.id ? (
+                    <div key={m.id} className="rounded-xl border border-[#D4A853]/30 bg-[#D4A853]/5 p-4 space-y-3">
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <input className={inputCls} placeholder="Full Name *" value={editMgr.name} onChange={e => setEditMgr({ ...editMgr, name: e.target.value })} />
+                        <input className={inputCls} placeholder="Phone *" value={editMgr.phone} onChange={e => setEditMgr({ ...editMgr, phone: e.target.value })} />
+                        <input className={inputCls} placeholder="Email" value={editMgr.email} onChange={e => setEditMgr({ ...editMgr, email: e.target.value })} />
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Assigned PG(s) *</span>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                          {PG_LIST.map(p => {
+                            const checked = editMgr.pg_names.includes(p);
+                            return (
+                              <label key={p} className={`flex items-center gap-2 cursor-pointer rounded-xl border px-3 py-2 text-sm transition-all ${checked ? "border-[#D4A853] bg-[#D4A853]/10" : "border-white/10 hover:border-white/20"}`}>
+                                <input type="checkbox" className="accent-[#D4A853]" checked={checked} onChange={() => {
+                                  const next = checked ? editMgr.pg_names.filter(x => x !== p) : [...editMgr.pg_names, p];
+                                  setEditMgr({ ...editMgr, pg_names: next });
+                                }} />
+                                {p}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <button onClick={() => setEditMgr(null)} className="glass glass-hover rounded-lg px-4 py-2 text-xs">Cancel</button>
+                        <button onClick={handleSaveManager} disabled={mgrSaving || !editMgr.name || !editMgr.phone || editMgr.pg_names.length === 0} className="btn-gold rounded-lg px-4 py-2 text-xs disabled:opacity-40">
+                          {mgrSaving ? "Saving..." : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
                     <div key={m.id} className={`flex items-center justify-between gap-3 rounded-xl border p-4 transition ${m.active ? "border-white/5 bg-white/[0.02]" : "border-red-500/10 bg-red-500/5 opacity-60"}`}>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -622,6 +689,7 @@ function OwnerDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
+                        <button onClick={() => startEditManager(m)} className="glass glass-hover rounded-lg px-3 py-2 text-xs">Edit</button>
                         <button onClick={() => handleToggleManager(m)} className={`glass glass-hover rounded-lg px-3 py-2 text-xs ${m.active ? "text-yellow-300" : "text-green-300"}`}>
                           {m.active ? "Deactivate" : "Activate"}
                         </button>
