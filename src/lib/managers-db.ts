@@ -25,8 +25,9 @@ export async function setManagerPassword(phone: string, password: string): Promi
 
 export async function verifyManagerPassword(phone: string, password: string): Promise<boolean> {
   const { data, error } = await supabase.rpc("verify_manager_password", { p_phone: phone, p_password: password });
+  console.log("[verifyManagerPassword] raw result:", JSON.stringify(data), "type:", typeof data, "error:", error);
   if (error) throw error;
-  return data as boolean;
+  return data === true;
 }
 
 export async function getManagerByPhone(phone: string): Promise<DbManager | null> {
