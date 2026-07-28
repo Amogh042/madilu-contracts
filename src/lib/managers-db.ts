@@ -13,8 +13,14 @@ export type DbManager = {
 
 export async function checkManagerPhone(phone: string): Promise<"new" | "needs_password" | "has_password" | "not_found"> {
   const { data, error } = await supabase.rpc("check_manager_phone", { p_phone: phone });
+  console.log("[checkManagerPhone] raw result:", JSON.stringify(data), "type:", typeof data, "error:", error);
   if (error) throw error;
-  return data as "new" | "needs_password" | "has_password" | "not_found";
+  const result = String(data);
+  if (result === "not_found") return "not_found";
+  if (result === "needs_password" || result === "new") return "needs_password";
+  if (result === "has_password") return "has_password";
+  console.warn("[checkManagerPhone] unexpected value, defaulting to needs_password:", data);
+  return "needs_password";
 }
 
 export async function setManagerPassword(phone: string, password: string): Promise<boolean> {

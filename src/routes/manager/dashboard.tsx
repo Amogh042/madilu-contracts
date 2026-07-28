@@ -50,7 +50,7 @@ function ManagerDashboard() {
     if (!session) navigate({ to: "/manager/login" });
   }, [session, navigate]);
 
-  const [view, setView] = useState<"home" | "flow" | "history" | "notifications" | "extension-pick" | "extension-preview" | "exit-pick" | "exit-preview">("home");
+  const [view, setView] = useState<"home" | "flow" | "history" | "notifications" | "extension-pick" | "extension-preview">("home");
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<Student | null>(null);
   const [data, setData] = useState<AgreementData | null>(null);
@@ -230,10 +230,6 @@ function ManagerDashboard() {
                     <svg className="w-5 h-5 text-[#D4A853]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" /></svg>
                     Tenure Extension
                   </button>
-                  <button onClick={() => setView("exit-pick")} className="glass glass-hover rounded-xl px-6 py-4 text-base font-medium flex items-center gap-2 border border-[#D4A853]/20">
-                    <svg className="w-5 h-5 text-[#D4A853]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                    Exit Certificate
-                  </button>
                 </div>
                 <div className="flex justify-center gap-3 mt-3">
                   <button onClick={() => setView("history")} className="glass glass-hover rounded-xl px-6 py-4 text-base font-medium">My Agreements</button>
@@ -388,18 +384,6 @@ function ManagerDashboard() {
           <SecondaryDocPreview agreement={secondaryDoc} docType="extension" onBack={() => setView("extension-pick")} />
         )}
 
-        {/* EXIT FLOW */}
-        {view === "exit-pick" && (
-          <AgreementStudentPicker
-            title="Exit / No-Dues Certificate"
-            managerId={session.id}
-            onBack={() => setView("home")}
-            onSelect={(a) => { setSecondaryDoc(a); setView("exit-preview"); }}
-          />
-        )}
-        {view === "exit-preview" && secondaryDoc && (
-          <SecondaryDocPreview agreement={secondaryDoc} docType="exit" onBack={() => setView("exit-pick")} />
-        )}
       </main>
 
       <footer className="relative z-10 text-center text-white/30 text-xs pb-6 font-mono">

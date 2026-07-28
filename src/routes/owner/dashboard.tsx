@@ -88,6 +88,7 @@ function OwnerDashboard() {
 
   const [filterPg, setFilterPg] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [agreementSearch, setAgreementSearch] = useState("");
 
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -138,8 +139,17 @@ function OwnerDashboard() {
     let r = agreements;
     if (filterPg) r = r.filter(a => a.pg_name === filterPg);
     if (filterStatus) r = r.filter(a => a.status === filterStatus);
+    if (agreementSearch.trim()) {
+      const q = agreementSearch.toLowerCase();
+      r = r.filter(a =>
+        a.student_name.toLowerCase().includes(q) ||
+        (a.student_phone || "").toLowerCase().includes(q) ||
+        a.pg_name.toLowerCase().includes(q) ||
+        (a.room_number || "").toLowerCase().includes(q)
+      );
+    }
     return r;
-  }, [agreements, filterPg, filterStatus]);
+  }, [agreements, filterPg, filterStatus, agreementSearch]);
 
   if (!authed) return null;
 
@@ -534,6 +544,12 @@ function OwnerDashboard() {
                 <button onClick={() => setView("home")} className="glass glass-hover rounded-xl px-4 py-2 text-sm">← Dashboard</button>
               </div>
             </div>
+            <input
+              className={inputCls + " mb-1"}
+              placeholder="Search by name, phone, PG, or room..."
+              value={agreementSearch}
+              onChange={e => setAgreementSearch(e.target.value)}
+            />
             <div className="flex gap-3 flex-wrap">
               <select value={filterPg} onChange={e => setFilterPg(e.target.value)} className={inputCls + " w-auto min-w-[160px]"}>
                 <option value="">All PGs</option>
