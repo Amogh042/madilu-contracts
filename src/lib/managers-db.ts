@@ -11,6 +11,41 @@ export type DbManager = {
   created_at: string;
 };
 
+export type ManagerLookup = {
+  id: string;
+  name: string;
+  phone: string;
+  pg_name: string;
+  password_hash: string | null;
+  active: boolean;
+};
+
+export async function lookupManagerByPhone(phone: string): Promise<{ status: "not_found" | "inactive" | "needs_password" | "has_password"; manager?: ManagerLookup }> {
+  const { data, error } = await supabase
+    .from("managers")
+    .select("id, name, phone, pg_name, password_hash, active")
+    .eq("phone", phone)
+    .single();
+
+  console.log("[lookupManagerByPhone] result:", JSON.stringify(data), "error:", error);
+
+  if (error || !data) {
+    return { status: "not_found" };
+  }
+
+  if (!data.active) {
+    return { status: "inactive", manager: data as ManagerLookup };
+  }
+
+  if (!data.password_hash || data.password_hash === "") {
+    console.log("[lookupManagerByPhone] No password set, needs_password");
+    return { status: "needs_password", manager: data as ManagerLookup };
+  }
+
+  console.log("[lookupManagerByPhone] Has password");
+  return { status: "has_password", manager: data as ManagerLookup };
+}
+
 export async function checkManagerPhone(phone: string): Promise<"new" | "needs_password" | "has_password" | "not_found"> {
   const { data, error } = await supabase.rpc("check_manager_phone", { p_phone: phone });
   console.log("[checkManagerPhone] raw result:", JSON.stringify(data), "type:", typeof data, "error:", error);

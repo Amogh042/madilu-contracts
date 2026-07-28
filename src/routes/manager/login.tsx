@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Background } from "@/components/agreement/Background";
-import { checkManagerPhone, setManagerPassword, verifyManagerPassword, getManagerByPhone } from "@/lib/managers-db";
+import { lookupManagerByPhone, setManagerPassword, verifyManagerPassword, getManagerByPhone, type ManagerLookup } from "@/lib/managers-db";
 import { setManagerSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/manager/login")({
@@ -18,18 +18,25 @@ function ManagerLogin() {
   const [stage, setStage] = useState<"phone" | "set_password" | "enter_password">("phone");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [managerData, setManagerData] = useState<ManagerLookup | null>(null);
 
   const handlePhoneSubmit = async () => {
     if (!phone.trim()) return;
     setLoading(true);
     setError("");
     try {
-      const result = await checkManagerPhone(phone.trim());
-      if (result === "not_found") {
+      const { status, manager } = await lookupManagerByPhone(phone.trim());
+      console.log("[handlePhoneSubmit] status:", status, "manager:", manager);
+
+      if (status === "not_found") {
         setError("Phone number not registered. Contact the owner to be added as a manager.");
-      } else if (result === "new" || result === "needs_password") {
+      } else if (status === "inactive") {
+        setError("Your account has been deactivated. Contact owner.");
+      } else if (status === "needs_password") {
+        setManagerData(manager!);
         setStage("set_password");
       } else {
+        setManagerData(manager!);
         setStage("enter_password");
       }
     } catch (e: unknown) {
@@ -46,13 +53,16 @@ function ManagerLogin() {
     setError("");
     try {
       const ok = await setManagerPassword(phone.trim(), password);
+      console.log("[handleSetPassword] result:", ok);
       if (!ok) { setError("Failed to set password"); return; }
       const manager = await getManagerByPhone(phone.trim());
       if (!manager) { setError("Manager not found"); return; }
       setManagerSession(manager);
       navigate({ to: "/manager/dashboard" });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to set password");
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[handleSetPassword] error:", msg);
+      setError("Failed to set password: " + msg);
     } finally {
       setLoading(false);
     }
@@ -64,6 +74,7 @@ function ManagerLogin() {
     setError("");
     try {
       const ok = await verifyManagerPassword(phone.trim(), password);
+      console.log("[handleLogin] verify result:", ok);
       if (!ok) { setError("Incorrect password"); setLoading(false); return; }
       const manager = await getManagerByPhone(phone.trim());
       if (!manager) { setError("Manager account not found or deactivated"); setLoading(false); return; }
