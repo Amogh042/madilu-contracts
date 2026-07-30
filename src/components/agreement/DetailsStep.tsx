@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { PG_ADDRESSES, PG_LIST, type AgreementData, type Instalment } from "@/lib/pg-data";
+import { PG_ADDRESSES, PG_LIST, OWNER_LIST, type AgreementData, type Instalment } from "@/lib/pg-data";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
@@ -99,13 +99,43 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
         {/* Left column — Owner + Resident extra fields */}
         <div className="space-y-5">
           <h3 className="font-display text-xl text-gold">Owner (First Party)</h3>
-          <Field label="Proprietor Name"><input className={inputCls} value={data.ownerName} onChange={e => update("ownerName", e.target.value)} placeholder="Full name" /></Field>
+          <Field label="Proprietor Name">
+            <Select
+              value={OWNER_LIST.some(o => o.name === data.ownerName) ? data.ownerName : data.ownerName ? "__other__" : undefined}
+              onValueChange={(v) => {
+                if (v === "__other__") {
+                  setData({ ...data, ownerName: "", ownerFatherName: "", ownerContact: "", ownerAge: "", ownerAddress: "" });
+                } else {
+                  const owner = OWNER_LIST.find(o => o.name === v);
+                  if (owner) {
+                    setData({ ...data, ownerName: owner.name, ownerFatherName: owner.fatherName, ownerContact: owner.contact, ownerAge: owner.age, ownerAddress: data.pgAddress });
+                  }
+                }
+              }}
+            >
+              <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                <SelectValue placeholder="Select Owner…" />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl">
+                {OWNER_LIST.map(o => (
+                  <SelectItem key={o.name} value={o.name} className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">
+                    {o.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value="__other__" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799] text-white/50">
+                  Other (enter manually)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {data.ownerName && !OWNER_LIST.some(o => o.name === data.ownerName) && (
+              <input className={inputCls + " mt-2"} value={data.ownerName} onChange={e => update("ownerName", e.target.value)} placeholder="Enter owner name" />
+            )}
+          </Field>
           <Field label="S/o (Father's Name)"><input className={inputCls} value={data.ownerFatherName} onChange={e => update("ownerFatherName", e.target.value)} placeholder="Father's name" /></Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Age"><input className={inputCls} value={data.ownerAge} onChange={e => update("ownerAge", e.target.value)} placeholder="Age" /></Field>
             <Field label="Contact"><input className={inputCls} value={data.ownerContact} onChange={e => update("ownerContact", e.target.value)} placeholder="Phone" /></Field>
           </div>
-          <Field label="Address"><input className={inputCls} value={data.ownerAddress} onChange={e => update("ownerAddress", e.target.value)} placeholder="Full address" /></Field>
 
           <h3 className="font-display text-xl text-gold pt-3">Resident (Second Party)</h3>
           <div className="grid grid-cols-2 gap-3">
@@ -129,7 +159,7 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
             ) : (
               <Select
                 value={data.pgName || undefined}
-                onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "" })}
+                onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "", ownerAddress: PG_ADDRESSES[pg] || "" })}
               >
                 <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
                   <SelectValue placeholder="Select PG…" />

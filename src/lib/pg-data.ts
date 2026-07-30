@@ -14,6 +14,33 @@ export const PG_ADDRESSES: Record<string, string> = {
 
 export const PG_LIST = Object.keys(PG_ADDRESSES);
 
+export const OWNER_LIST = [
+  {
+    name: "B T Rajanna",
+    fatherName: "T S Thodappa",
+    contact: "8095609333",
+    age: "72",
+  },
+  {
+    name: "V N Leelavathi",
+    fatherName: "Neelappa",
+    contact: "8105127333",
+    age: "67",
+  },
+  {
+    name: "Naveen Kumar B R",
+    fatherName: "B T Rajanna",
+    contact: "9980143133",
+    age: "44",
+  },
+  {
+    name: "Priyanka M",
+    fatherName: "M Manjunath",
+    contact: "9620530333",
+    age: "31",
+  },
+];
+
 export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSMGMgKmlE7yHTh3hHbz3jBvQvqDJ_igNvzm_4hu_KQvQwPoMfmo-9yTmyNHjf0sFVsN4JtkzRt7r5C/pub?output=csv";
 
 export type Student = {

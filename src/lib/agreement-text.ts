@@ -40,7 +40,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   sections.push({ type: "clause-title", text: "BETWEEN", bold: true });
 
-  sections.push({ type: "paragraph", text: `FIRST PARTY / OWNER: Madilu PG Accommodation, a proprietorship concern, represented by its Proprietor ${blank(d.ownerName)}, S/o ${blank(d.ownerFatherName)}, aged ${blank(d.ownerAge)} years, residing at ${blank(d.ownerAddress)} (hereinafter referred to as the "Owner", which expression shall, unless repugnant to the context, include his/her heirs, successors, legal representatives and assigns).` });
+  sections.push({ type: "paragraph", text: `FIRST PARTY / OWNER: Madilu PG Accommodation, a proprietorship concern, represented by its Proprietor ${blank(d.ownerName)}, S/o ${blank(d.ownerFatherName)}, aged ${blank(d.ownerAge)} years, residing at ${blank(d.pgAddress)} (hereinafter referred to as the "Owner", which expression shall, unless repugnant to the context, include his/her heirs, successors, legal representatives and assigns).` });
 
   sections.push({ type: "paragraph", text: `SECOND PARTY / RESIDENT: ${blank(s.name)}, Son/Daughter of ${blank(s.parentName)}, aged ${blank(d.residentAge)} years, permanent address: ${blank(s.permanentAddress)}, currently studying at ${blank(d.residentCollege)}, Student ID: ${blank(d.residentStudentId)}, Mobile: ${blank(s.phone)}, Email: ${blank(s.email)} (hereinafter referred to as the "Resident").` });
 
