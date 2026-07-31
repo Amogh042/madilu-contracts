@@ -160,12 +160,6 @@ export function generateExtensionPDF(a: DbAgreement) {
   doc.text("Witness 2: ______________________", LEFT + colW + 10, y);
   y += LH + 6;
 
-  doc.setFontSize(9);
-  doc.setFont("times", "italic");
-  doc.text("Print on ₹100 E-stamp paper. Keep 2 copies.", LEFT, y);
-  doc.setFont("times", "normal");
-  doc.setFontSize(11);
-
   const filename = `Extension_${a.student_name.replace(/\s+/g, "_")}_${Date.now()}.pdf`;
   doc.save(filename);
 }

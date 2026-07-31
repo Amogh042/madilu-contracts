@@ -75,7 +75,6 @@ function ExtensionPreview({ a }: { a: DbAgreement }) {
         <p className="text-sm">Witness 1: ______________________</p>
         <p className="text-sm">Witness 2: ______________________</p>
       </div>
-      <p className="mt-4 text-xs italic text-gray-500">Print on ₹100 E-stamp paper. Keep 2 copies.</p>
     </>
   );
 }
