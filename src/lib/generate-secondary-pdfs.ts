@@ -47,12 +47,21 @@ export function generateExtensionPDF(a: DbAgreement) {
 
   let y = FIRST_TOP;
   const LH = 5.2;
+  const maxY = PAGE_H - BOTTOM;
+
+  const ensure = (needed: number) => {
+    if (y + needed > maxY) {
+      doc.addPage();
+      y = TOP;
+    }
+  };
 
   const writeLine = (text: string, bold = false, fontSize = 11, indent = 0) => {
     doc.setFont("times", bold ? "bold" : "normal");
     doc.setFontSize(fontSize);
     const lines = doc.splitTextToSize(text, TEXT_W - indent) as string[];
     for (const line of lines) {
+      ensure(LH);
       doc.text(line, LEFT + indent, y);
       y += LH;
     }
@@ -131,6 +140,8 @@ export function generateExtensionPDF(a: DbAgreement) {
   writeLine("SIGNATURES", true);
   writeGap(3);
 
+  ensure(LH * 3 + 6 + LH + 6 + LH);
+
   const colW = (TEXT_W - 10) / 2;
   const sigY = y;
   doc.text("PG Owner: ______________________", LEFT, y); y += LH;
@@ -167,12 +178,21 @@ export function generateExitPDF(a: DbAgreement) {
   doc.setTextColor(0, 0, 0);
 
   const LH = 5.5;
+  const maxY = PAGE_H - BOTTOM;
+
+  const ensure = (needed: number) => {
+    if (y + needed > maxY) {
+      doc.addPage();
+      y = TOP;
+    }
+  };
 
   const writeLine = (text: string, bold = false, fontSize = 11, indent = 0) => {
     doc.setFont("times", bold ? "bold" : "normal");
     doc.setFontSize(fontSize);
     const lines = doc.splitTextToSize(text, TEXT_W - indent) as string[];
     for (const line of lines) {
+      ensure(LH);
       doc.text(line, LEFT + indent, y);
       y += LH;
     }
