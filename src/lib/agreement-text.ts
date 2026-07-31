@@ -143,7 +143,9 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   const monthsLabel = `${monthsDuration} (${numberToWordsForMonths(monthsDuration)}) months`;
 
   const clauseB = segs(
-    "B. The Resident has approached the Owner seeking accommodation as a Paying Guest in Room No. ",
+    "B. The Resident has approached the Owner seeking accommodation as a Paying Guest at ",
+    B(blank(d.pgName)),
+    " in Room No. ",
     B(blank(d.roomNumber)),
     " of the said PG facility for a period of ",
     B(monthsLabel),
@@ -172,23 +174,30 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   // Clause 2
   sections.push({ type: "clause-title", text: "CLAUSE 2 — LICENSE FEE & SECURITY DEPOSIT", bold: true });
+  const totalAmt = d.totalAmount || Math.round(d.monthlyRent * monthsDuration);
   if (d.paymentMode === "Monthly") {
     const clause21m = segs(
       "2.1 The Resident shall pay a Monthly License Fee of Rs. ",
       B(`${inr(d.monthlyRent)}/-`),
       " (Rupees ",
       B(amountInWords(d.monthlyRent)),
-      " only) payable on or before the 5th day of each calendar month via UPI/Bank Transfer to the Owner's designated account."
+      " only) payable on or before the 5th day of each calendar month via UPI/Bank Transfer to the Owner's designated account, summing upto Rs. ",
+      B(`${inr(totalAmt)}/-`),
+      " (Rupees ",
+      B(amountInWords(totalAmt)),
+      " only) for ",
+      B(monthsLabel),
+      "."
     );
     sections.push({ type: "sub-clause", ...clause21m, indent: 1 });
   } else if (d.instalments?.length) {
     const count = d.instalments.length;
-    const total = d.instalments.reduce((sum, i) => sum + (i.amount || 0), 0);
+    const instalmentTotal = d.instalments.reduce((sum, i) => sum + (i.amount || 0), 0);
     const parts: (string | TextSegment)[] = [
       "2.1 The Resident shall pay the License Fee of Rs. ",
-      B(`${inr(total)}/-`),
+      B(`${inr(instalmentTotal)}/-`),
       " (Rupees ",
-      B(amountInWords(total)),
+      B(amountInWords(instalmentTotal)),
       `) only) in ${count} instalment(s) via UPI/Bank Transfer to the Owner's designated account:`,
     ];
     d.instalments.forEach((inst, idx) => {

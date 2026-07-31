@@ -104,26 +104,19 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
 
   useEffect(() => {
     if (totalManual) return;
-    let auto = 0;
-    if (data.paymentMode === "Monthly") {
-      const months = calcMonthsBetween(data.startDate, data.endDate);
-      auto = Math.round(data.monthlyRent * months);
-    } else if (data.instalments?.length) {
-      auto = Math.round(data.instalments.reduce((sum, i) => sum + (i.amount || 0), 0));
-    }
+    const months = calcMonthsBetween(data.startDate, data.endDate);
+    const auto = Math.round(data.monthlyRent * months);
     if (auto !== (data.totalAmount || 0)) {
       setData({ ...data, totalAmount: auto });
     }
-  }, [data.monthlyRent, data.startDate, data.endDate, data.paymentMode, data.instalments, totalManual]);
+  }, [data.monthlyRent, data.startDate, data.endDate, totalManual]);
 
   const update = <K extends keyof AgreementData>(k: K, v: AgreementData[K]) => setData({ ...data, [k]: v });
 
   const isMonthly = data.paymentMode === "Monthly";
   const instalmentCount = data.instalments?.length || 0;
 
-  const hasPaymentAmount = isMonthly
-    ? data.monthlyRent > 0
-    : instalmentCount > 0 && data.instalments!.every(i => i.amount > 0);
+  const hasPaymentAmount = data.monthlyRent > 0;
 
   const updateInstalment = (idx: number, field: keyof Instalment, value: number | string) => {
     const arr = [...(data.instalments || [])];
@@ -236,6 +229,14 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
           <Field label="PG Address"><input className={inputCls} value={data.pgAddress} onChange={e => update("pgAddress", e.target.value)} placeholder="Full address" /></Field>
           <Field label="Room Number"><input className={inputCls} value={data.roomNumber} onChange={e => update("roomNumber", e.target.value)} placeholder="Room no." /></Field>
 
+          <Field label="Monthly Rent (₹)">
+            <input type="number" step="1" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
+              onChange={e => {
+                const rent = Math.round(Number(e.target.value));
+                setData({ ...data, monthlyRent: rent, securityDeposit: rent * 3 });
+              }} placeholder="0" />
+          </Field>
+
           {/* Payment Mode */}
           <Field label="Payment Mode">
             <div className="grid grid-cols-2 gap-2">
@@ -245,7 +246,6 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
                     setData({
                       ...data,
                       paymentMode: m,
-                      monthlyRent: m === "Monthly" ? data.monthlyRent : 0,
                       instalments: m === "Instalments" ? (data.instalments?.length ? data.instalments : []) : undefined,
                     });
                   }} />
@@ -254,17 +254,6 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
               ))}
             </div>
           </Field>
-
-          {/* Dynamic payment fields based on mode */}
-          {isMonthly && (
-            <Field label="Monthly Rent (₹)">
-              <input type="number" step="1" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
-                onChange={e => {
-                  const rent = Math.round(Number(e.target.value));
-                  setData({ ...data, monthlyRent: rent, securityDeposit: rent * 3 });
-                }} placeholder="0" />
-            </Field>
-          )}
 
           {!isMonthly && (
             <div className="space-y-4">
