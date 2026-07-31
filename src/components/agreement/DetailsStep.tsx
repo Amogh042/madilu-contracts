@@ -73,16 +73,20 @@ const DateField = ({ value, onChange }: { value: string; onChange: (v: string) =
 export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPgs }: Props) {
   const effectiveLockedPg = lockedPg || (allowedPgs?.length === 1 ? allowedPgs[0] : undefined);
   const pgOptions = allowedPgs && allowedPgs.length > 1 ? allowedPgs : PG_LIST;
+  const calculateEndDate = (startDate: string): string => {
+    const start = new Date(startDate + "T12:00:00");
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + 1);
+    end.setDate(end.getDate() - 1);
+    const y = end.getFullYear();
+    const m = String(end.getMonth() + 1).padStart(2, "0");
+    const day = String(end.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
   useEffect(() => {
-    if (data.startDate && !data.endDate) {
-      const d = parseDateLocal(data.startDate);
-      if (d) {
-        d.setMonth(d.getMonth() + 11);
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        setData({ ...data, endDate: `${y}-${m}-${day}` });
-      }
+    if (data.startDate) {
+      setData({ ...data, endDate: calculateEndDate(data.startDate) });
     }
   }, [data.startDate]);
 
