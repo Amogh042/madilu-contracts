@@ -49,7 +49,7 @@ const initialAgreement = (s: Student): AgreementData => {
     student: s,
     ownerName: "", ownerContact: "", ownerFatherName: "", ownerAge: "", ownerAddress: "",
     residentAge: s.age || "", residentCollege: s.collegeName || "", residentStudentId: s.studentId || "",
-    parentFatherName: "", parentAge: s.guardianAge || "",
+    parentFatherName: s.guardianName || "", parentAge: s.guardianAge || "",
     pgName: pg, pgAddress: PG_ADDRESSES[pg] || "", roomNumber: "",
     monthlyRent: 0, paymentMode, startDate: "", endDate: "",
     securityDeposit: 0, maintenanceCharges: 0,
