@@ -32,7 +32,7 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
     timestamp: "", name: "", dob: "", contactNumber: "", email: "",
     permanentAddress: "", age: "", collegeName: "", studentId: "",
     guardianName: "", guardianAddress: "", guardianPhone: "", guardianEmail: "",
-    guardianAge: "", guardianRelation: "", pgOption: "", paymentMode: "",
+    guardianAge: "", guardianRelation: "", aadhaarNumber: "", pgOption: "", paymentMode: "",
     declaration: "", gender: "",
   });
 

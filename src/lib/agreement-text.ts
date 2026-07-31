@@ -28,6 +28,24 @@ const fmtMonthYear = (iso: string) => {
 const inr = (n: number) => new Intl.NumberFormat("en-IN").format(Math.round(n || 0));
 const blank = (v: string) => v || "____________";
 
+const calcMonths = (startIso: string, endIso: string): number => {
+  const s = parseLocal(startIso);
+  const e = parseLocal(endIso);
+  if (!s || !e) return 12;
+  let months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+  if (e.getDate() >= s.getDate()) months += 1;
+  return months || 12;
+};
+
+const WORD_MAP: Record<number, string> = {
+  1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six",
+  7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Twelve",
+  13: "Thirteen", 14: "Fourteen", 15: "Fifteen", 16: "Sixteen", 17: "Seventeen",
+  18: "Eighteen", 19: "Nineteen", 20: "Twenty", 21: "Twenty-One", 22: "Twenty-Two",
+  23: "Twenty-Three", 24: "Twenty-Four",
+};
+const numberToWordsForMonths = (n: number): string => WORD_MAP[n] || String(n);
+
 export type AgreementSection = {
   type: "header" | "subheader" | "paragraph" | "clause-title" | "sub-clause" | "signature-row" | "witness-row" | "note" | "section-title" | "blank-space";
   text: string;
@@ -51,14 +69,16 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   sections.push({ type: "paragraph", text: `FIRST PARTY / OWNER: Madilu PG Accommodation, a proprietorship concern, represented by its Proprietor ${blank(d.ownerName)}, S/o ${blank(d.ownerFatherName)}, aged ${blank(d.ownerAge)} years, residing at ${blank(d.pgAddress)} (hereinafter referred to as the "Owner", which expression shall, unless repugnant to the context, include his/her heirs, successors, legal representatives and assigns).` });
 
   const relationLabel = s.guardianRelation ? `${s.guardianRelation}` : "Son/Daughter of";
-  sections.push({ type: "paragraph", text: `SECOND PARTY / RESIDENT: ${blank(s.name)}, ${relationLabel} ${blank(s.guardianName)}, aged ${blank(d.residentAge)} years, permanent address: ${blank(s.permanentAddress)}, currently studying at ${blank(d.residentCollege)}, Student ID: ${blank(d.residentStudentId)}, Mobile: ${blank(s.contactNumber)}, Email: ${blank(s.email)} (hereinafter referred to as the "Resident").` });
+  sections.push({ type: "paragraph", text: `SECOND PARTY / RESIDENT: ${blank(s.name)}, ${relationLabel} ${blank(s.guardianName)}, aged ${blank(d.residentAge)} years, permanent address: ${blank(s.permanentAddress)}, currently studying at ${blank(d.residentCollege)}, Student ID: ${blank(d.residentStudentId)}, Aadhaar No: ${blank(d.residentAadhaar)}, Mobile: ${blank(s.contactNumber)}, Email: ${blank(s.email)} (hereinafter referred to as the "Resident").` });
 
-  sections.push({ type: "paragraph", text: `THIRD PARTY / GUARANTOR/PARENT: ${blank(s.guardianName)}, S/o/D/o ${blank(d.parentFatherName)}, aged ${blank(d.parentAge)} years, residing at ${blank(s.guardianAddress)}, Mobile: ${blank(s.guardianPhone)}, Email: ${blank(s.guardianEmail)} (hereinafter referred to as the "Guarantor/Parent").` });
+  sections.push({ type: "paragraph", text: `THIRD PARTY / GUARANTOR/PARENT: ${blank(s.guardianName)}, aged ${blank(d.parentAge)} years, residing at ${blank(s.guardianAddress)}, Mobile: ${blank(s.guardianPhone)}, Email: ${blank(s.guardianEmail)} (hereinafter referred to as the "Guarantor/Parent").` });
 
   sections.push({ type: "clause-title", text: "WHEREAS", bold: true });
 
   sections.push({ type: "sub-clause", text: "A. The Owner is running and managing a Paying Guest accommodation facility under the name and style of \"Madilu PG Accommodation\" at Kumaraswamy Layout, Bengaluru, Karnataka.", indent: 1 });
-  sections.push({ type: "sub-clause", text: `B. The Resident has approached the Owner seeking accommodation as a Paying Guest in Room No. ${blank(d.roomNumber)} of the said PG facility for a period of 12 (Twelve) months.`, indent: 1 });
+  const monthsDuration = calcMonths(d.startDate, d.endDate);
+  const monthsLabel = `${monthsDuration} (${numberToWordsForMonths(monthsDuration)}) months`;
+  sections.push({ type: "sub-clause", text: `B. The Resident has approached the Owner seeking accommodation as a Paying Guest in Room No. ${blank(d.roomNumber)} of the said PG facility for a period of ${monthsLabel}.`, indent: 1 });
   sections.push({ type: "sub-clause", text: "C. The Owner has agreed to grant a temporary license to the Resident for use and occupation of a bed space in the said room, subject to the terms and conditions set forth herein.", indent: 1 });
 
   sections.push({ type: "paragraph", text: "NOW THEREFORE, in consideration of the mutual covenants and agreements herein contained, the Parties agree as follows:" });
@@ -66,7 +86,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   // Clause 1
   sections.push({ type: "clause-title", text: "CLAUSE 1 — NATURE OF AGREEMENT & DURATION", bold: true });
   sections.push({ type: "sub-clause", text: "1.1 This Agreement is a temporary, revocable license to use and occupy a bed space in the designated room of the PG facility. It does not create any tenancy, lease, sub-lease, or any right of exclusive possession in favour of the Resident. The physical possession of the premises shall at all times remain with the Owner.", indent: 1 });
-  sections.push({ type: "sub-clause", text: `1.2 This License shall be valid for a period of 12 (Twelve) months commencing from ${fmtDate(d.startDate)} and ending on ${fmtDate(d.endDate)}.`, indent: 1 });
+  sections.push({ type: "sub-clause", text: `1.2 This License shall be valid for a period of ${monthsLabel} commencing from ${fmtDate(d.startDate)} and ending on ${fmtDate(d.endDate)}.`, indent: 1 });
 
   // Clause 2
   sections.push({ type: "clause-title", text: "CLAUSE 2 — LICENSE FEE & SECURITY DEPOSIT", bold: true });
@@ -87,7 +107,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   // Clause 3
   sections.push({ type: "clause-title", text: "CLAUSE 3 — MANDATORY LOCK-IN & NOTICE PERIOD", bold: true });
-  sections.push({ type: "sub-clause", text: "3.1 There shall be a mandatory lock-in period of 12 (Twelve) months from the date of commencement. In the event of early exit by the Resident during the lock-in period, the balance rent for the remaining months shall become immediately payable and the entire Security Deposit shall stand forfeited.", indent: 1 });
+  sections.push({ type: "sub-clause", text: `3.1 There shall be a mandatory lock-in period of ${monthsLabel} from the date of commencement. In the event of early exit by the Resident during the lock-in period, the balance rent for the remaining months shall become immediately payable and the entire Security Deposit shall stand forfeited.`, indent: 1 });
   sections.push({ type: "sub-clause", text: "3.2 After completion of the lock-in period, the Resident shall provide a minimum of 30 (Thirty) days written notice via WhatsApp/Email before vacating. Failure to provide such notice shall result in deduction of one month's rent from the Security Deposit.", indent: 1 });
 
   // Clause 4
@@ -131,7 +151,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   // Signature blocks
   sections.push({ type: "signature-row", text: "", columns: [
-    `FIRST PARTY / OWNER\n\n\nSignature: ______________________\nFor Madilu PG Accommodation\n${blank(d.ownerName)}, Proprietor`,
+    `FIRST PARTY / OWNER\n\n\nSignature: ______________________\nFor\nMadilu PG Accommodation,\nProprietor\n${blank(d.ownerName)}`,
     `SECOND PARTY / RESIDENT\n\n\nSignature: ______________________\n${blank(s.name)}`,
   ]});
 

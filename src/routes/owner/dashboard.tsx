@@ -49,6 +49,7 @@ const initialAgreement = (s: Student): AgreementData => {
     student: s,
     ownerName: "", ownerContact: "", ownerFatherName: "", ownerAge: "", ownerAddress: "",
     residentAge: s.age || "", residentCollege: s.collegeName || "", residentStudentId: s.studentId || "",
+    residentAadhaar: s.aadhaarNumber || "",
     parentFatherName: s.guardianName || "", parentAge: s.guardianAge || "",
     pgName: pg, pgAddress: PG_ADDRESSES[pg] || "", roomNumber: "",
     monthlyRent: 0, paymentMode, startDate: "", endDate: "",
@@ -351,9 +352,9 @@ function OwnerDashboard() {
 
   const generateDefaultTemplate = (): string => {
     const placeholder: AgreementData = {
-      student: { name: "{RESIDENT_NAME}", dob: "", contactNumber: "{RESIDENT_PHONE}", email: "{RESIDENT_EMAIL}", permanentAddress: "{RESIDENT_ADDRESS}", age: "", collegeName: "", studentId: "", guardianName: "{PARENT_NAME}", guardianAddress: "{PARENT_ADDRESS}", guardianPhone: "{PARENT_PHONE}", guardianEmail: "{PARENT_EMAIL}", guardianAge: "", guardianRelation: "", pgOption: "", paymentMode: "", declaration: "", timestamp: "", gender: "" },
+      student: { name: "{RESIDENT_NAME}", dob: "", contactNumber: "{RESIDENT_PHONE}", email: "{RESIDENT_EMAIL}", permanentAddress: "{RESIDENT_ADDRESS}", age: "", collegeName: "", studentId: "", guardianName: "{PARENT_NAME}", guardianAddress: "{PARENT_ADDRESS}", guardianPhone: "{PARENT_PHONE}", guardianEmail: "{PARENT_EMAIL}", guardianAge: "", guardianRelation: "", aadhaarNumber: "", pgOption: "", paymentMode: "", declaration: "", timestamp: "", gender: "" },
       ownerName: "{OWNER_NAME}", ownerContact: "{OWNER_CONTACT}", ownerFatherName: "{OWNER_FATHER}", ownerAge: "{OWNER_AGE}", ownerAddress: "{OWNER_ADDRESS}",
-      residentAge: "{RESIDENT_AGE}", residentCollege: "{COLLEGE}", residentStudentId: "{STUDENT_ID}",
+      residentAge: "{RESIDENT_AGE}", residentCollege: "{COLLEGE}", residentStudentId: "{STUDENT_ID}", residentAadhaar: "",
       parentFatherName: "{PARENT_FATHER}", parentAge: "{PARENT_AGE}",
       pgName: "{PG_NAME}", pgAddress: "{PG_ADDRESS}", roomNumber: "{ROOM_NO}", monthlyRent: 0, paymentMode: "Monthly",
       startDate: "", endDate: "", securityDeposit: 0, maintenanceCharges: 0,

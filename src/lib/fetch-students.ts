@@ -32,6 +32,7 @@ function parseStudentRow(row: Record<string, string>): Student {
     guardianEmail: getField(row, "Parent/Guardian Email Address", "Parent/Guardian Email", "Parent Email", "Guardian Email"),
     guardianAge: getField(row, "Parent/Guardian Age", "Guardian Age"),
     guardianRelation: getField(row, "Relationship with Student (S/o, D/o, W/o)", "Relationship with Student", "Relation"),
+    aadhaarNumber: getField(row, "Aadhaar Number", "Aadhar Number", "Aadhaar", "Aadhar"),
     pgOption: getField(row, "Select PG Option", "PG Option", "PG Name", "PG"),
     paymentMode: getField(row, "Preferred Payment Mode", "Payment Mode", "Payment"),
     declaration: getField(row, "Declaration of Accuracy and Agreement to Terms", "Declaration"),

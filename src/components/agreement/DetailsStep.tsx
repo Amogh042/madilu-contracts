@@ -168,6 +168,7 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
             <Field label="Student ID"><input className={inputCls} value={data.residentStudentId} onChange={e => update("residentStudentId", e.target.value)} placeholder="ID number" /></Field>
           </div>
           <Field label="College Name"><input className={inputCls} value={data.residentCollege} onChange={e => update("residentCollege", e.target.value)} placeholder="College / Institution" /></Field>
+          <Field label="Aadhaar Number"><input className={inputCls} value={data.residentAadhaar} onChange={e => update("residentAadhaar", e.target.value)} placeholder="Aadhaar number" /></Field>
 
           <h3 className="font-display text-xl text-gold pt-3">Parent / Guarantor (Third Party)</h3>
           <Field label="S/o / D/o (Father's Name)"><input className={inputCls} value={data.parentFatherName} onChange={e => update("parentFatherName", e.target.value)} placeholder="Father's name" /></Field>
@@ -263,7 +264,7 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
                 <div key={idx} className="grid grid-cols-2 gap-3">
                   <Field label={`Instalment ${idx + 1} Amount (₹)`}>
                     <input type="number" className={inputCls + " font-mono"} value={inst.amount || ""}
-                      onChange={e => updateInstalment(idx, "amount", Number(e.target.value))} placeholder="0" />
+                      onChange={e => updateInstalment(idx, "amount", Math.round(Number(e.target.value)))} placeholder="0" />
                   </Field>
                   <Field label="Due Date">
                     <DateField value={inst.dueDate} onChange={(v) => updateInstalment(idx, "dueDate", v)} />
@@ -279,8 +280,8 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Security Deposit (₹)"><input type="number" className={inputCls + " font-mono"} value={data.securityDeposit || ""} onChange={e => update("securityDeposit", Number(e.target.value))} placeholder="0" /></Field>
-            <Field label="AMC / Maintenance (₹)"><input type="number" className={inputCls + " font-mono"} value={data.maintenanceCharges || ""} onChange={e => update("maintenanceCharges", Number(e.target.value))} placeholder="0" /></Field>
+            <Field label="Security Deposit (₹)"><input type="number" step="1" className={inputCls + " font-mono"} value={data.securityDeposit || ""} onChange={e => update("securityDeposit", Math.round(Number(e.target.value)))} placeholder="0" /></Field>
+            <Field label="AMC / Maintenance (₹)"><input type="number" step="1" className={inputCls + " font-mono"} value={data.maintenanceCharges || ""} onChange={e => update("maintenanceCharges", Math.round(Number(e.target.value)))} placeholder="0" /></Field>
           </div>
         </div>
       </div>

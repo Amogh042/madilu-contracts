@@ -59,6 +59,7 @@ export type Student = {
   guardianEmail: string;
   guardianAge: string;
   guardianRelation: string;
+  aadhaarNumber: string;
   pgOption: string;
   paymentMode: string;
   declaration: string;
@@ -80,6 +81,7 @@ export type AgreementData = {
   residentAge: string;
   residentCollege: string;
   residentStudentId: string;
+  residentAadhaar: string;
   parentFatherName: string;
   parentAge: string;
   pgName: string;
