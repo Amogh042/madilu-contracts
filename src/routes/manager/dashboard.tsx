@@ -129,11 +129,12 @@ function ManagerDashboard() {
     console.log("[handleDone] session:", session, "editingId:", editingId);
     console.log("[handleDone] student:", d.student.name, "pg:", d.pgName);
     try {
+      const withManager = { ...d, createdByManagerName: session.name };
       if (editingId) {
-        await updateAgreement(editingId, d);
+        await updateAgreement(editingId, withManager);
         setSuccessMsg("Agreement updated successfully");
       } else {
-        const created = await createAgreement(d, session.id, "pending");
+        const created = await createAgreement(withManager, session.id, "pending");
         try {
           await createNotification({
             user_type: "owner",

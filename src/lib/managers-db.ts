@@ -58,17 +58,43 @@ export async function checkManagerPhone(phone: string): Promise<"new" | "needs_p
   return "needs_password";
 }
 
+async function hashPassword(password: string): Promise<string> {
+  const data = new TextEncoder().encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 export async function setManagerPassword(phone: string, password: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc("set_manager_password", { p_phone: phone, p_password: password });
-  if (error) throw error;
-  return data as boolean;
+  const hash = await hashPassword(password);
+  console.log("[setManagerPassword] storing SHA-256 hash for phone:", phone);
+  const { error } = await supabase
+    .from("managers")
+    .update({ password_hash: hash })
+    .eq("phone", phone);
+  if (error) {
+    console.error("[setManagerPassword] error:", error);
+    throw new Error(error.message || "Failed to set password");
+  }
+  return true;
 }
 
 export async function verifyManagerPassword(phone: string, password: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc("verify_manager_password", { p_phone: phone, p_password: password });
-  console.log("[verifyManagerPassword] raw result:", JSON.stringify(data), "type:", typeof data, "error:", error);
-  if (error) throw error;
-  return data === true;
+  const hash = await hashPassword(password);
+  const { data, error } = await supabase
+    .from("managers")
+    .select("password_hash")
+    .eq("phone", phone)
+    .single();
+  console.log("[verifyManagerPassword] stored hash:", data?.password_hash?.slice(0, 8) + "...", "computed hash:", hash.slice(0, 8) + "...");
+  if (error || !data) return false;
+  if (data.password_hash === hash) return true;
+  // If stored hash isn't SHA-256 (length != 64), it's from the old broken RPC — force password reset
+  if (data.password_hash && data.password_hash.length !== 64) {
+    console.warn("[verifyManagerPassword] Legacy non-SHA-256 hash detected, clearing for reset");
+    await supabase.from("managers").update({ password_hash: null }).eq("phone", phone);
+    return false;
+  }
+  return false;
 }
 
 export async function getManagerByPhone(phone: string): Promise<DbManager | null> {

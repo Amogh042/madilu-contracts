@@ -2,9 +2,16 @@ import Papa from "papaparse";
 import { GOOGLE_SHEET_CSV_URL, type Student } from "./pg-data";
 
 const pick = (row: Record<string, string>, keys: string[]): string => {
+  const rowKeys = Object.keys(row);
   for (const k of keys) {
-    const found = Object.keys(row).find((rk) => rk.toLowerCase().trim() === k.toLowerCase().trim());
-    if (found && row[found]) return String(row[found]).trim();
+    const kl = k.toLowerCase().trim();
+    const exact = rowKeys.find((rk) => rk.toLowerCase().trim() === kl);
+    if (exact && row[exact]) return String(row[exact]).trim();
+  }
+  for (const k of keys) {
+    const kl = k.toLowerCase().trim();
+    const partial = rowKeys.find((rk) => rk.toLowerCase().trim().includes(kl) || kl.includes(rk.toLowerCase().trim()));
+    if (partial && row[partial]) return String(row[partial]).trim();
   }
   return "";
 };
@@ -20,18 +27,18 @@ export async function fetchStudents(): Promise<Student[]> {
   return parsed.data
     .map((row): Student => ({
       timestamp: pick(row, ["Timestamp"]),
-      name: pick(row, ["Full Name"]),
-      dob: pick(row, ["Date of Birth"]),
-      phone: pick(row, ["Contact Number"]),
-      email: pick(row, ["Email Address"]),
-      permanentAddress: pick(row, ["Permanent Address (Full residential address)"]),
-      parentName: pick(row, ["Parent/Guardian Full Name"]),
-      parentAddress: pick(row, ["Parent/Guardian Address (Full residential address)"]),
-      parentPhone: pick(row, ["Parent/Guardian Contact Number"]),
-      parentEmail: pick(row, ["Parent/Guardian Email Address"]),
-      pg: pick(row, ["Select PG Option"]),
-      declaration: pick(row, ["Declaration of Accuracy and Agreement to Terms"]),
-      paymentMode: "",
+      name: pick(row, ["Full Name", "Name", "Student Name"]),
+      dob: pick(row, ["Date of Birth", "DOB", "Birth Date"]),
+      phone: pick(row, ["Contact Number", "Phone Number", "Mobile Number", "Phone", "Mobile"]),
+      email: pick(row, ["Email Address", "Email", "Student Email"]),
+      permanentAddress: pick(row, ["Permanent Address (Full residential address)", "Permanent Address", "Address"]),
+      parentName: pick(row, ["Parent/Guardian Full Name", "Parent Name", "Guardian Name", "Parent/Guardian Name"]),
+      parentAddress: pick(row, ["Parent/Guardian Address (Full residential address)", "Parent/Guardian Address", "Parent Address", "Guardian Address"]),
+      parentPhone: pick(row, ["Parent/Guardian Contact Number", "Parent/Guardian Phone", "Parent Phone", "Guardian Phone", "Guardian Contact"]),
+      parentEmail: pick(row, ["Parent/Guardian Email Address", "Parent/Guardian Email", "Parent Email", "Guardian Email"]),
+      pg: pick(row, ["Select PG Option", "PG Option", "PG Name", "PG"]),
+      declaration: pick(row, ["Declaration of Accuracy and Agreement to Terms", "Declaration"]),
+      paymentMode: pick(row, ["Payment Mode", "Payment"]),
     }))
     .filter((s) => s.name);
 }

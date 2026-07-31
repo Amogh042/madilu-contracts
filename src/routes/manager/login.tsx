@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Background } from "@/components/agreement/Background";
 import { lookupManagerByPhone, setManagerPassword, verifyManagerPassword, getManagerByPhone, type ManagerLookup } from "@/lib/managers-db";
 import { setManagerSession } from "@/lib/auth";
@@ -9,6 +10,35 @@ export const Route = createFileRoute("/manager/login")({
 });
 
 const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 transition-all";
+
+function PasswordInput({ value, onChange, onKeyDown, placeholder }: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+  placeholder: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        className={inputCls + " pr-10 mt-1.5"}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        placeholder={placeholder}
+        type={show ? "text" : "password"}
+      />
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 mt-[3px] text-white/40 hover:text-white/70 transition"
+        tabIndex={-1}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
 
 function ManagerLogin() {
   const navigate = useNavigate();
@@ -132,11 +162,11 @@ function ManagerLogin() {
               <p className="text-[#4ECDC4] text-sm">First time login — set your password.</p>
               <label className="block">
                 <span className="text-xs uppercase tracking-wider text-white/50 font-medium">New Password</span>
-                <input className={inputCls + " mt-1.5"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" type="password" />
+                <PasswordInput value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" />
               </label>
               <label className="block">
                 <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Confirm Password</span>
-                <input className={inputCls + " mt-1.5"} value={confirmPw} onChange={e => setConfirmPw(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSetPassword()} placeholder="Repeat password" type="password" />
+                <PasswordInput value={confirmPw} onChange={e => setConfirmPw(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSetPassword()} placeholder="Repeat password" />
               </label>
               <button onClick={handleSetPassword} disabled={loading} className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40">
                 {loading ? "Setting..." : "Set Password & Login"}
@@ -149,7 +179,7 @@ function ManagerLogin() {
               <p className="text-white/50 text-sm">Phone: <span className="text-white font-mono">{phone}</span></p>
               <label className="block">
                 <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Password</span>
-                <input className={inputCls + " mt-1.5"} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="Enter your password" type="password" />
+                <PasswordInput value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="Enter your password" />
               </label>
               <button onClick={handleLogin} disabled={loading || !password} className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40">
                 {loading ? "Signing in..." : "Sign In"}

@@ -27,9 +27,15 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
 const triggerCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-all hover:border-[#D4A853]/40 data-[state=open]:border-[#D4A853]/60 data-[placeholder]:text-white/40";
 
+const parseDateLocal = (v: string): Date | undefined => {
+  if (!v) return undefined;
+  const [y, m, d] = v.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0);
+};
+
 const DateField = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
   const [open, setOpen] = useState(false);
-  const date = value ? new Date(value) : undefined;
+  const date = parseDateLocal(value);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className={triggerCls}>
@@ -45,8 +51,18 @@ const DateField = ({ value, onChange }: { value: string; onChange: (v: string) =
         <Calendar
           mode="single"
           selected={date}
-          onSelect={(d) => { if (d) { onChange(d.toISOString().slice(0,10)); setOpen(false); } }}
+          onSelect={(d) => {
+            if (d) {
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, "0");
+              const day = String(d.getDate()).padStart(2, "0");
+              onChange(`${y}-${m}-${day}`);
+              setOpen(false);
+            }
+          }}
           captionLayout="dropdown"
+          fromYear={2024}
+          toYear={2030}
           className="bg-transparent text-white"
         />
       </PopoverContent>
@@ -59,9 +75,14 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
   const pgOptions = allowedPgs && allowedPgs.length > 1 ? allowedPgs : PG_LIST;
   useEffect(() => {
     if (data.startDate && !data.endDate) {
-      const d = new Date(data.startDate);
-      d.setMonth(d.getMonth() + 11);
-      setData({ ...data, endDate: d.toISOString().slice(0, 10) });
+      const d = parseDateLocal(data.startDate);
+      if (d) {
+        d.setMonth(d.getMonth() + 11);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        setData({ ...data, endDate: `${y}-${m}-${day}` });
+      }
     }
   }, [data.startDate]);
 
@@ -206,9 +227,9 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
           {/* Dynamic payment fields based on mode */}
           {isMonthly && (
             <Field label="Monthly Rent (₹)">
-              <input type="number" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
+              <input type="number" step="1" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
                 onChange={e => {
-                  const rent = Number(e.target.value);
+                  const rent = Math.round(Number(e.target.value));
                   setData({ ...data, monthlyRent: rent, securityDeposit: rent * 3 });
                 }} placeholder="0" />
             </Field>

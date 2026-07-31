@@ -1,19 +1,26 @@
 import type { AgreementData } from "./pg-data";
 
+const parseLocal = (iso: string): Date | null => {
+  if (!iso) return null;
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0);
+};
+
 const fmtDate = (iso: string) => {
-  if (!iso) return "____________";
-  const d = new Date(iso);
+  const d = parseLocal(iso);
+  if (!d) return "____________";
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 };
 
 const fmtDay = (iso: string) => {
-  if (!iso) return "___";
-  return new Date(iso).getDate().toString();
+  const d = parseLocal(iso);
+  if (!d) return "___";
+  return d.getDate().toString();
 };
 
 const fmtMonthYear = (iso: string) => {
-  if (!iso) return "_______, ____";
-  const d = new Date(iso);
+  const d = parseLocal(iso);
+  if (!d) return "_______, ____";
   return d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 };
 
@@ -125,8 +132,9 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   sections.push({ type: "signature-row", text: `THIRD PARTY / GUARANTOR/PARENT\n\n\nSignature: ______________________\n${blank(s.parentName)}` });
 
   sections.push({ type: "clause-title", text: "WITNESSES", bold: true });
+  const witness1Name = d.createdByManagerName || "______________________";
   sections.push({ type: "signature-row", text: "", columns: [
-    "1. Signature: ______________________\n   Name: ______________________\n   Address: ______________________",
+    `1. Signature: ______________________\n   Name: ${witness1Name}\n   Address: ______________________`,
     "2. Signature: ______________________\n   Name: ______________________\n   Address: ______________________",
   ]});
 

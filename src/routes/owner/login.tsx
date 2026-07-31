@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Background } from "@/components/agreement/Background";
 import { ownerSignIn } from "@/lib/auth";
 
@@ -13,6 +14,7 @@ function OwnerLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,7 +60,24 @@ function OwnerLogin() {
             </label>
             <label className="block">
               <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Password</span>
-              <input className={inputCls + " mt-1.5"} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="Password" type="password" />
+              <div className="relative">
+                <input
+                  className={inputCls + " pr-10 mt-1.5"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleLogin()}
+                  placeholder="Password"
+                  type={showPw ? "text" : "password"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 mt-[3px] text-white/40 hover:text-white/70 transition"
+                  tabIndex={-1}
+                >
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </label>
             <button onClick={handleLogin} disabled={loading || !email || !password} className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40">
               {loading ? "Signing in..." : "Sign In"}

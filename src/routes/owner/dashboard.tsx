@@ -126,6 +126,17 @@ function OwnerDashboard() {
 
   useEffect(() => { if (authed) loadAll(); }, [authed, loadAll]);
 
+  const managersMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const mgr of managers) m.set(mgr.id, mgr.name);
+    return m;
+  }, [managers]);
+
+  const getCreatorLabel = (a: DbAgreement) => {
+    if (!a.manager_id) return "Owner";
+    return managersMap.get(a.manager_id) || "Manager";
+  };
+
   const pendingAgreements = useMemo(() => agreements.filter(a => a.status === "pending"), [agreements]);
   const monthCount = useMemo(() => {
     const now = new Date();
@@ -459,6 +470,7 @@ function OwnerDashboard() {
                           <span className="text-[#F5D799]">{a.pg_name}</span>
                           {a.room_number && <><span className="mx-1 text-white/20">·</span>Room {a.room_number}</>}
                           <span className="mx-1 text-white/20">·</span>Rs. {inr(a.monthly_rent)}/mo
+                          <span className="mx-1 text-white/20">·</span><span className="text-[#4ECDC4]/70">by {getCreatorLabel(a)}</span>
                         </p>
                       </div>
                       <div className="flex gap-2 shrink-0">
@@ -580,6 +592,7 @@ function OwnerDashboard() {
                           {a.room_number && <><span className="mx-1 text-white/20">·</span>Room {a.room_number}</>}
                           <span className="mx-1 text-white/20">·</span><span className="font-mono">{new Date(a.created_at).toLocaleDateString("en-IN")}</span>
                           {a.monthly_rent > 0 && <><span className="mx-1 text-white/20">·</span><span className="font-mono text-[#4ECDC4]">Rs. {inr(a.monthly_rent)}/mo</span></>}
+                          <span className="mx-1 text-white/20">·</span><span className="text-[#4ECDC4]/70">by {getCreatorLabel(a)}</span>
                         </p>
                         {a.status === "rejected" && a.rejection_reason && (
                           <p className="text-xs text-red-300 mt-1">Reason: {a.rejection_reason}</p>

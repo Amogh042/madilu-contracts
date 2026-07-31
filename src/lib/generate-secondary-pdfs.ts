@@ -12,8 +12,9 @@ const TEXT_W = PAGE_W - LEFT - RIGHT;
 
 const fmtDate = (iso: string) => {
   if (!iso) return "____________";
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d, 12, 0, 0);
+  return date.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 };
 
 const inr = (n: number) => new Intl.NumberFormat("en-IN").format(Math.round(n || 0));
