@@ -45,7 +45,8 @@ export function generateExtensionPDF(a: DbAgreement) {
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
 
-  let y = FIRST_TOP;
+  const EXT_FIRST_TOP = 55;
+  let y = EXT_FIRST_TOP;
   const LH = 5.2;
   const maxY = PAGE_H - BOTTOM;
 
