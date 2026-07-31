@@ -44,12 +44,13 @@ const initialAgreement = (s: Student): AgreementData => {
   const pmRaw = (s.paymentMode || "").toLowerCase();
   const paymentMode: AgreementData["paymentMode"] =
     pmRaw.includes("annual") || pmRaw.includes("instalment") || pmRaw.includes("installment") ? "Instalments" : "Monthly";
+  const pg = s.pgOption?.trim() || "";
   return {
     student: s,
     ownerName: "", ownerContact: "", ownerFatherName: "", ownerAge: "", ownerAddress: "",
-    residentAge: "", residentCollege: "", residentStudentId: "",
-    parentFatherName: "", parentAge: "",
-    pgName: s.pg?.trim() || "", pgAddress: PG_ADDRESSES[s.pg?.trim() || ""] || "", roomNumber: "",
+    residentAge: s.age || "", residentCollege: s.collegeName || "", residentStudentId: s.studentId || "",
+    parentFatherName: "", parentAge: s.guardianAge || "",
+    pgName: pg, pgAddress: PG_ADDRESSES[pg] || "", roomNumber: "",
     monthlyRent: 0, paymentMode, startDate: "", endDate: "",
     securityDeposit: 0, maintenanceCharges: 0,
   };
@@ -350,7 +351,7 @@ function OwnerDashboard() {
 
   const generateDefaultTemplate = (): string => {
     const placeholder: AgreementData = {
-      student: { name: "{RESIDENT_NAME}", dob: "", phone: "{RESIDENT_PHONE}", email: "{RESIDENT_EMAIL}", pg: "", permanentAddress: "{RESIDENT_ADDRESS}", parentName: "{PARENT_NAME}", parentAddress: "{PARENT_ADDRESS}", parentPhone: "{PARENT_PHONE}", parentEmail: "{PARENT_EMAIL}", paymentMode: "", declaration: "", timestamp: "" },
+      student: { name: "{RESIDENT_NAME}", dob: "", contactNumber: "{RESIDENT_PHONE}", email: "{RESIDENT_EMAIL}", permanentAddress: "{RESIDENT_ADDRESS}", age: "", collegeName: "", studentId: "", guardianName: "{PARENT_NAME}", guardianAddress: "{PARENT_ADDRESS}", guardianPhone: "{PARENT_PHONE}", guardianEmail: "{PARENT_EMAIL}", guardianAge: "", guardianRelation: "", pgOption: "", paymentMode: "", declaration: "", timestamp: "", gender: "" },
       ownerName: "{OWNER_NAME}", ownerContact: "{OWNER_CONTACT}", ownerFatherName: "{OWNER_FATHER}", ownerAge: "{OWNER_AGE}", ownerAddress: "{OWNER_ADDRESS}",
       residentAge: "{RESIDENT_AGE}", residentCollege: "{COLLEGE}", residentStudentId: "{STUDENT_ID}",
       parentFatherName: "{PARENT_FATHER}", parentAge: "{PARENT_AGE}",

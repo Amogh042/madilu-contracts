@@ -1,20 +1,36 @@
 import Papa from "papaparse";
 import { GOOGLE_SHEET_CSV_URL, type Student } from "./pg-data";
 
-const pick = (row: Record<string, string>, keys: string[]): string => {
-  const rowKeys = Object.keys(row);
-  for (const k of keys) {
-    const kl = k.toLowerCase().trim();
-    const exact = rowKeys.find((rk) => rk.toLowerCase().trim() === kl);
-    if (exact && row[exact]) return String(row[exact]).trim();
-  }
-  for (const k of keys) {
-    const kl = k.toLowerCase().trim();
-    const partial = rowKeys.find((rk) => rk.toLowerCase().trim().includes(kl) || kl.includes(rk.toLowerCase().trim()));
-    if (partial && row[partial]) return String(row[partial]).trim();
-  }
-  return "";
+const COLUMN_MAP: Record<string, keyof Student> = {
+  "Timestamp": "timestamp",
+  "Full Name (as per Aadhaar)": "name",
+  "Date of Birth": "dob",
+  "Contact Number": "contactNumber",
+  "Email Address": "email",
+  "Permanent Address (Full residential address)": "permanentAddress",
+  "Age": "age",
+  "College Name": "collegeName",
+  "College ID Number": "studentId",
+  "Parent/Guardian Full Name": "guardianName",
+  "Parent/Guardian Address (Full residential address)": "guardianAddress",
+  "Parent/Guardian Contact Number": "guardianPhone",
+  "Parent/Guardian Email Address": "guardianEmail",
+  "Parent/Guardian Age": "guardianAge",
+  "Relationship with Student (S/o, D/o, W/o)": "guardianRelation",
+  "Select PG Option": "pgOption",
+  "Preferred Payment Mode": "paymentMode",
+  "Declaration of Accuracy and Agreement to Terms": "declaration",
+  "Gender": "gender",
 };
+
+function mapColumnToField(header: string): keyof Student | null {
+  if (COLUMN_MAP[header]) return COLUMN_MAP[header];
+  const headerLower = header.toLowerCase().trim();
+  for (const [col, field] of Object.entries(COLUMN_MAP)) {
+    if (col.toLowerCase().trim() === headerLower) return field;
+  }
+  return null;
+}
 
 export async function fetchStudents(): Promise<Student[]> {
   if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.startsWith("PASTE_")) {
@@ -24,21 +40,28 @@ export async function fetchStudents(): Promise<Student[]> {
   if (!res.ok) throw new Error(`Failed to fetch sheet (${res.status})`);
   const text = await res.text();
   const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
+
+  const headers = parsed.meta.fields || [];
+  const headerFieldMap = new Map<string, keyof Student>();
+  for (const h of headers) {
+    const field = mapColumnToField(h);
+    if (field) headerFieldMap.set(h, field);
+  }
+
   return parsed.data
-    .map((row): Student => ({
-      timestamp: pick(row, ["Timestamp"]),
-      name: pick(row, ["Full Name", "Name", "Student Name"]),
-      dob: pick(row, ["Date of Birth", "DOB", "Birth Date"]),
-      phone: pick(row, ["Contact Number", "Phone Number", "Mobile Number", "Phone", "Mobile"]),
-      email: pick(row, ["Email Address", "Email", "Student Email"]),
-      permanentAddress: pick(row, ["Permanent Address (Full residential address)", "Permanent Address", "Address"]),
-      parentName: pick(row, ["Parent/Guardian Full Name", "Parent Name", "Guardian Name", "Parent/Guardian Name"]),
-      parentAddress: pick(row, ["Parent/Guardian Address (Full residential address)", "Parent/Guardian Address", "Parent Address", "Guardian Address"]),
-      parentPhone: pick(row, ["Parent/Guardian Contact Number", "Parent/Guardian Phone", "Parent Phone", "Guardian Phone", "Guardian Contact"]),
-      parentEmail: pick(row, ["Parent/Guardian Email Address", "Parent/Guardian Email", "Parent Email", "Guardian Email"]),
-      pg: pick(row, ["Select PG Option", "PG Option", "PG Name", "PG"]),
-      declaration: pick(row, ["Declaration of Accuracy and Agreement to Terms", "Declaration"]),
-      paymentMode: pick(row, ["Payment Mode", "Payment"]),
-    }))
+    .map((row): Student => {
+      const student: Student = {
+        timestamp: "", name: "", dob: "", contactNumber: "", email: "",
+        permanentAddress: "", age: "", collegeName: "", studentId: "",
+        guardianName: "", guardianAddress: "", guardianPhone: "", guardianEmail: "",
+        guardianAge: "", guardianRelation: "", pgOption: "", paymentMode: "",
+        declaration: "", gender: "",
+      };
+      for (const [header, field] of headerFieldMap) {
+        const val = row[header];
+        if (val) student[field] = String(val).trim();
+      }
+      return student;
+    })
     .filter((s) => s.name);
 }

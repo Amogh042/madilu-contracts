@@ -31,12 +31,13 @@ const initialAgreement = (s: Student, pgName?: string): AgreementData => {
   const pmRaw = (s.paymentMode || "").toLowerCase();
   const paymentMode: AgreementData["paymentMode"] =
     pmRaw.includes("annual") || pmRaw.includes("instalment") || pmRaw.includes("installment") ? "Instalments" : "Monthly";
+  const pg = pgName || s.pgOption?.trim() || "";
   return {
     student: s,
     ownerName: "", ownerContact: "", ownerFatherName: "", ownerAge: "", ownerAddress: "",
-    residentAge: "", residentCollege: "", residentStudentId: "",
-    parentFatherName: "", parentAge: "",
-    pgName: pgName || "", pgAddress: PG_ADDRESSES[pgName || ""] || "", roomNumber: "",
+    residentAge: s.age || "", residentCollege: s.collegeName || "", residentStudentId: s.studentId || "",
+    parentFatherName: "", parentAge: s.guardianAge || "",
+    pgName: pg, pgAddress: PG_ADDRESSES[pg] || "", roomNumber: "",
     monthlyRent: 0, paymentMode, startDate: "", endDate: "",
     securityDeposit: 0, maintenanceCharges: 0,
   };

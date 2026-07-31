@@ -29,9 +29,11 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [manual, setManual] = useState<Student>({
-    name: "", dob: "", phone: "", email: "", pg: "", permanentAddress: "",
-    parentName: "", parentAddress: "", parentPhone: "", parentEmail: "",
-    paymentMode: "", declaration: "", timestamp: "",
+    timestamp: "", name: "", dob: "", contactNumber: "", email: "",
+    permanentAddress: "", age: "", collegeName: "", studentId: "",
+    guardianName: "", guardianAddress: "", guardianPhone: "", guardianEmail: "",
+    guardianAge: "", guardianRelation: "", pgOption: "", paymentMode: "",
+    declaration: "", gender: "",
   });
 
   const load = async () => {
@@ -49,9 +51,9 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
     const term = q.toLowerCase();
     return students.filter(s =>
       s.name.toLowerCase().includes(term) ||
-      s.phone.includes(term) ||
+      s.contactNumber.includes(term) ||
       s.email.toLowerCase().includes(term) ||
-      s.pg.toLowerCase().includes(term)
+      s.pgOption.toLowerCase().includes(term)
     );
   }, [q, students]);
 
@@ -109,17 +111,17 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
               <div className="col-span-full text-center text-white/40 py-12 text-sm">No students found.</div>
             )}
             {filtered.map((s, i) => {
-              const isSel = selected?.name === s.name && selected?.phone === s.phone;
+              const isSel = selected?.name === s.name && selected?.contactNumber === s.contactNumber;
               return (
                 <button key={i} onClick={() => onSelect(s)}
                   className={`glass glass-hover rounded-xl p-4 text-left transition-all ${isSel ? "ring-2 ring-[#D4A853]" : ""}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-display text-lg font-semibold truncate">{s.name}</p>
-                      <p className="text-xs text-white/60 mt-0.5 font-mono">{s.phone}</p>
+                      <p className="text-xs text-white/60 mt-0.5 font-mono">{s.contactNumber}</p>
                       <p className="text-xs text-white/40 mt-0.5 truncate">{s.email}</p>
                     </div>
-                    {s.pg && <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap">{s.pg}</span>}
+                    {s.pgOption && <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap">{s.pgOption}</span>}
                   </div>
                 </button>
               );
@@ -137,7 +139,7 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
               <input className={inputCls} value={manual.dob} onChange={e => updateManual("dob", e.target.value)} placeholder="DD/MM/YYYY" />
             </Field>
             <Field label="Contact Number">
-              <input className={inputCls} value={manual.phone} onChange={e => updateManual("phone", e.target.value)} placeholder="Phone number" />
+              <input className={inputCls} value={manual.contactNumber} onChange={e => updateManual("contactNumber", e.target.value)} placeholder="Phone number" />
             </Field>
             <Field label="Email Address">
               <input className={inputCls} value={manual.email} onChange={e => updateManual("email", e.target.value)} placeholder="Email" />
@@ -146,7 +148,7 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
               <textarea className={inputCls + " min-h-[80px] resize-y"} value={manual.permanentAddress} onChange={e => updateManual("permanentAddress", e.target.value)} placeholder="Full residential address" />
             </Field>
             <Field label="PG Option">
-              <Select value={manual.pg || undefined} onValueChange={(v) => updateManual("pg", v)}>
+              <Select value={manual.pgOption || undefined} onValueChange={(v) => updateManual("pgOption", v)}>
                 <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
                   <SelectValue placeholder="Select PG…" />
                 </SelectTrigger>
@@ -164,16 +166,19 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
           <div className="space-y-4">
             <h3 className="font-display text-xl text-gold">Parent / Guardian</h3>
             <Field label="Parent/Guardian Full Name">
-              <input className={inputCls} value={manual.parentName} onChange={e => updateManual("parentName", e.target.value)} placeholder="Full Name" />
+              <input className={inputCls} value={manual.guardianName} onChange={e => updateManual("guardianName", e.target.value)} placeholder="Full Name" />
+            </Field>
+            <Field label="Relationship (S/o, D/o, W/o)">
+              <input className={inputCls} value={manual.guardianRelation} onChange={e => updateManual("guardianRelation", e.target.value)} placeholder="S/o, D/o, W/o" />
             </Field>
             <Field label="Parent/Guardian Address">
-              <textarea className={inputCls + " min-h-[80px] resize-y"} value={manual.parentAddress} onChange={e => updateManual("parentAddress", e.target.value)} placeholder="Full residential address" />
+              <textarea className={inputCls + " min-h-[80px] resize-y"} value={manual.guardianAddress} onChange={e => updateManual("guardianAddress", e.target.value)} placeholder="Full residential address" />
             </Field>
             <Field label="Parent/Guardian Contact">
-              <input className={inputCls} value={manual.parentPhone} onChange={e => updateManual("parentPhone", e.target.value)} placeholder="Phone number" />
+              <input className={inputCls} value={manual.guardianPhone} onChange={e => updateManual("guardianPhone", e.target.value)} placeholder="Phone number" />
             </Field>
             <Field label="Parent/Guardian Email">
-              <input className={inputCls} value={manual.parentEmail} onChange={e => updateManual("parentEmail", e.target.value)} placeholder="Email" />
+              <input className={inputCls} value={manual.guardianEmail} onChange={e => updateManual("guardianEmail", e.target.value)} placeholder="Email" />
             </Field>
           </div>
         </div>

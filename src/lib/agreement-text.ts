@@ -49,9 +49,10 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   sections.push({ type: "paragraph", text: `FIRST PARTY / OWNER: Madilu PG Accommodation, a proprietorship concern, represented by its Proprietor ${blank(d.ownerName)}, S/o ${blank(d.ownerFatherName)}, aged ${blank(d.ownerAge)} years, residing at ${blank(d.pgAddress)} (hereinafter referred to as the "Owner", which expression shall, unless repugnant to the context, include his/her heirs, successors, legal representatives and assigns).` });
 
-  sections.push({ type: "paragraph", text: `SECOND PARTY / RESIDENT: ${blank(s.name)}, Son/Daughter of ${blank(s.parentName)}, aged ${blank(d.residentAge)} years, permanent address: ${blank(s.permanentAddress)}, currently studying at ${blank(d.residentCollege)}, Student ID: ${blank(d.residentStudentId)}, Mobile: ${blank(s.phone)}, Email: ${blank(s.email)} (hereinafter referred to as the "Resident").` });
+  const relationLabel = s.guardianRelation ? `${s.guardianRelation}` : "Son/Daughter of";
+  sections.push({ type: "paragraph", text: `SECOND PARTY / RESIDENT: ${blank(s.name)}, ${relationLabel} ${blank(s.guardianName)}, aged ${blank(d.residentAge)} years, permanent address: ${blank(s.permanentAddress)}, currently studying at ${blank(d.residentCollege)}, Student ID: ${blank(d.residentStudentId)}, Mobile: ${blank(s.contactNumber)}, Email: ${blank(s.email)} (hereinafter referred to as the "Resident").` });
 
-  sections.push({ type: "paragraph", text: `THIRD PARTY / GUARANTOR/PARENT: ${blank(s.parentName)}, S/o/D/o ${blank(d.parentFatherName)}, aged ${blank(d.parentAge)} years, residing at ${blank(s.parentAddress)}, Mobile: ${blank(s.parentPhone)}, Email: ${blank(s.parentEmail)} (hereinafter referred to as the "Guarantor/Parent").` });
+  sections.push({ type: "paragraph", text: `THIRD PARTY / GUARANTOR/PARENT: ${blank(s.guardianName)}, S/o/D/o ${blank(d.parentFatherName)}, aged ${blank(d.parentAge)} years, residing at ${blank(s.guardianAddress)}, Mobile: ${blank(s.guardianPhone)}, Email: ${blank(s.guardianEmail)} (hereinafter referred to as the "Guarantor/Parent").` });
 
   sections.push({ type: "clause-title", text: "WHEREAS", bold: true });
 
@@ -129,7 +130,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
     `SECOND PARTY / RESIDENT\n\n\nSignature: ______________________\n${blank(s.name)}`,
   ]});
 
-  sections.push({ type: "signature-row", text: `THIRD PARTY / GUARANTOR/PARENT\n\n\nSignature: ______________________\n${blank(s.parentName)}` });
+  sections.push({ type: "signature-row", text: `THIRD PARTY / GUARANTOR/PARENT\n\n\nSignature: ______________________\n${blank(s.guardianName)}` });
 
   sections.push({ type: "clause-title", text: "WITNESSES", bold: true });
   const witness1Name = d.createdByManagerName || "______________________";

@@ -44,19 +44,25 @@ export const OWNER_LIST = [
 export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSMGMgKmlE7yHTh3hHbz3jBvQvqDJ_igNvzm_4hu_KQvQwPoMfmo-9yTmyNHjf0sFVsN4JtkzRt7r5C/pub?output=csv";
 
 export type Student = {
+  timestamp: string;
   name: string;
   dob: string;
-  phone: string;
+  contactNumber: string;
   email: string;
-  pg: string;
   permanentAddress: string;
-  parentName: string;
-  parentAddress: string;
-  parentPhone: string;
-  parentEmail: string;
+  age: string;
+  collegeName: string;
+  studentId: string;
+  guardianName: string;
+  guardianAddress: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  guardianAge: string;
+  guardianRelation: string;
+  pgOption: string;
   paymentMode: string;
   declaration: string;
-  timestamp: string;
+  gender: string;
 };
 
 export type Instalment = {
