@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { LayoutGrid, List } from "lucide-react";
 import { fetchStudents } from "@/lib/fetch-students";
 import { PG_LIST } from "@/lib/pg-data";
 import type { Student } from "@/lib/pg-data";
@@ -22,8 +23,26 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </label>
 );
 
+const parseTimestamp = (ts: string): number => {
+  if (!ts) return 0;
+  const d = new Date(ts);
+  if (!isNaN(d.getTime())) return d.getTime();
+  const parts = ts.match(/(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})\s*(\d{1,2}):(\d{2}):?(\d{2})?\s*(AM|PM)?/i);
+  if (!parts) return 0;
+  let [, day, month, year, hours, mins, secs, ampm] = parts;
+  let y = Number(year);
+  if (y < 100) y += 2000;
+  let h = Number(hours);
+  if (ampm) {
+    if (ampm.toUpperCase() === "PM" && h < 12) h += 12;
+    if (ampm.toUpperCase() === "AM" && h === 12) h = 0;
+  }
+  return new Date(y, Number(month) - 1, Number(day), h, Number(mins), Number(secs || 0)).getTime();
+};
+
 export function StudentStep({ selected, onSelect, onNext }: Props) {
   const [mode, setMode] = useState<"sheet" | "manual">("sheet");
+  const [viewMode, setViewMode] = useState<"box" | "list">("box");
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +59,7 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
     setLoading(true); setError(null);
     try {
       const data = await fetchStudents();
+      data.sort((a, b) => parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp));
       setStudents(data);
     } catch (e) { setError(e instanceof Error ? e.message : "Failed to load"); }
     finally { setLoading(false); }
@@ -65,6 +85,8 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
 
   const manualValid = manual.name.trim().length > 0;
 
+  const isSel = (s: Student) => selected?.name === s.name && selected?.contactNumber === s.contactNumber;
+
   return (
     <div className="glass rounded-3xl p-8 animate-fade-in">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
@@ -76,9 +98,27 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
         </div>
         <div className="flex gap-2">
           {mode === "sheet" && (
-            <button onClick={load} disabled={loading} className="glass glass-hover rounded-xl px-4 py-2 text-sm font-medium">
-              {loading ? "Refreshing…" : "↻ Refresh List"}
-            </button>
+            <>
+              <div className="flex rounded-xl border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setViewMode("box")}
+                  className={`px-3 py-2 transition-all ${viewMode === "box" ? "bg-[#D4A853]/20 text-[#F5D799]" : "text-white/40 hover:text-white/60"}`}
+                  title="Box View"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`px-3 py-2 transition-all ${viewMode === "list" ? "bg-[#D4A853]/20 text-[#F5D799]" : "text-white/40 hover:text-white/60"}`}
+                  title="List View"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
+              <button onClick={load} disabled={loading} className="glass glass-hover rounded-xl px-4 py-2 text-sm font-medium">
+                {loading ? "Refreshing…" : "↻ Refresh List"}
+              </button>
+            </>
           )}
           <button
             onClick={() => setMode(mode === "sheet" ? "manual" : "sheet")}
@@ -103,29 +143,48 @@ export function StudentStep({ selected, onSelect, onNext }: Props) {
             </div>
           )}
 
-          <div className="grid sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-2">
-            {loading && Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="glass rounded-xl p-4 h-24 animate-pulse" />
-            ))}
-            {!loading && filtered.length === 0 && !error && (
-              <div className="col-span-full text-center text-white/40 py-12 text-sm">No students found.</div>
+          <div className="max-h-[420px] overflow-y-auto pr-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(212,168,83,0.3) transparent" }}>
+            {loading && (
+              <div className={viewMode === "box" ? "grid sm:grid-cols-2 gap-3" : "space-y-1"}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className={`glass animate-pulse ${viewMode === "box" ? "rounded-xl p-4 h-24" : "rounded-lg h-12"}`} />
+                ))}
+              </div>
             )}
-            {filtered.map((s, i) => {
-              const isSel = selected?.name === s.name && selected?.contactNumber === s.contactNumber;
-              return (
-                <button key={i} onClick={() => onSelect(s)}
-                  className={`glass glass-hover rounded-xl p-4 text-left transition-all ${isSel ? "ring-2 ring-[#D4A853]" : ""}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-display text-lg font-semibold truncate">{s.name}</p>
-                      <p className="text-xs text-white/60 mt-0.5 font-mono">{s.contactNumber}</p>
-                      <p className="text-xs text-white/40 mt-0.5 truncate">{s.email}</p>
+            {!loading && filtered.length === 0 && !error && (
+              <div className="text-center text-white/40 py-12 text-sm">No students found.</div>
+            )}
+
+            {!loading && filtered.length > 0 && viewMode === "box" && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {filtered.map((s, i) => (
+                  <button key={i} onClick={() => onSelect(s)}
+                    className={`glass glass-hover rounded-xl p-4 text-left transition-all ${isSel(s) ? "ring-2 ring-[#D4A853]" : ""}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-display text-lg font-semibold truncate">{s.name}</p>
+                        <p className="text-xs text-white/60 mt-0.5 font-mono">{s.contactNumber}</p>
+                        <p className="text-xs text-white/40 mt-0.5 truncate">{s.email}</p>
+                      </div>
+                      {s.pgOption && <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap">{s.pgOption}</span>}
                     </div>
-                    {s.pgOption && <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap">{s.pgOption}</span>}
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {!loading && filtered.length > 0 && viewMode === "list" && (
+              <div className="space-y-1">
+                {filtered.map((s, i) => (
+                  <button key={i} onClick={() => onSelect(s)}
+                    className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-lg text-left transition-all hover:bg-white/[0.04] ${isSel(s) ? "ring-2 ring-[#D4A853] bg-[#D4A853]/5" : ""}`}>
+                    <p className="font-medium text-sm truncate min-w-0 flex-1">{s.name}</p>
+                    {s.pgOption && <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#D4A853]/15 text-[#F5D799] whitespace-nowrap shrink-0">{s.pgOption}</span>}
+                    <p className="text-xs text-white/50 font-mono shrink-0">{s.contactNumber}</p>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </>
       ) : (
