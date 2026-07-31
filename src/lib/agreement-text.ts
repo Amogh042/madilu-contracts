@@ -29,7 +29,7 @@ const inr = (n: number) => new Intl.NumberFormat("en-IN").format(Math.round(n ||
 const blank = (v: string) => v || "____________";
 
 export type AgreementSection = {
-  type: "header" | "subheader" | "paragraph" | "clause-title" | "sub-clause" | "signature-row" | "note" | "section-title";
+  type: "header" | "subheader" | "paragraph" | "clause-title" | "sub-clause" | "signature-row" | "witness-row" | "note" | "section-title";
   text: string;
   bold?: boolean;
   indent?: number;
@@ -135,9 +135,9 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   sections.push({ type: "clause-title", text: "WITNESSES", bold: true });
   const witness1Name = d.createdByManagerName || "______________________";
-  sections.push({ type: "signature-row", text: "", columns: [
-    `1. Signature: ______________________\n   Name: ${witness1Name}\n   Address: ______________________`,
-    "2. Signature: ______________________\n   Name: ______________________\n   Address: ______________________",
+  sections.push({ type: "witness-row", text: "", columns: [
+    `1.\nName: ${witness1Name}\n[Signature Box]`,
+    `2.\nName: ______________________\n[Signature Box]`,
   ]});
 
   return sections;
@@ -149,7 +149,7 @@ export function buildAgreementParagraphs(d: AgreementData): string[] {
     if (s.bold && (s.type === "clause-title" || s.type === "header" || s.type === "section-title")) {
       return `**${s.text}**`;
     }
-    if (s.type === "signature-row" && s.columns) {
+    if ((s.type === "signature-row" || s.type === "witness-row") && s.columns) {
       return s.columns.join("\n\n");
     }
     return s.text;

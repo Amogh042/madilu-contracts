@@ -146,6 +146,42 @@ export function generateAgreementPDF(d: AgreementData) {
         }
         break;
       }
+      case "witness-row": {
+        if (sec.columns && sec.columns.length === 2) {
+          const colW = (TEXT_W - 10) / 2;
+          const boxW = 50;
+          const boxH = 20;
+          ensure(LINE_H * 2 + boxH + 10);
+          y += 3;
+          doc.setFontSize(FONT_SIZE);
+
+          const witness1Lines = sec.columns[0].split("\n").filter(l => !l.includes("[Signature Box]"));
+          const witness2Lines = sec.columns[1].split("\n").filter(l => !l.includes("[Signature Box]"));
+
+          const startY = y;
+          for (const line of witness1Lines) {
+            doc.text(line, LEFT, y);
+            y += LINE_H;
+          }
+          y += 2;
+          doc.setLineWidth(0.3);
+          doc.rect(LEFT, y, boxW, boxH);
+          const leftBoxEnd = y + boxH;
+
+          y = startY;
+          const rightX = LEFT + colW + 10;
+          for (const line of witness2Lines) {
+            doc.text(line, rightX, y);
+            y += LINE_H;
+          }
+          y += 2;
+          doc.rect(rightX, y, boxW, boxH);
+          const rightBoxEnd = y + boxH;
+
+          y = Math.max(leftBoxEnd, rightBoxEnd) + 5;
+        }
+        break;
+      }
       case "note":
         break;
     }
