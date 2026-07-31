@@ -1,4 +1,5 @@
 import type { AgreementData } from "./pg-data";
+import { amountInWords } from "./utils";
 
 const parseLocal = (iso: string): Date | null => {
   if (!iso) return null;
@@ -70,19 +71,19 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   // Clause 2
   sections.push({ type: "clause-title", text: "CLAUSE 2 — LICENSE FEE & SECURITY DEPOSIT", bold: true });
   if (d.paymentMode === "Monthly") {
-    sections.push({ type: "sub-clause", text: `2.1 The Resident shall pay a Monthly License Fee of Rs. ${inr(d.monthlyRent)}/- (Rupees ${blank("")} only) payable on or before the 5th day of each calendar month via UPI/Bank Transfer to the Owner's designated account.`, indent: 1 });
+    sections.push({ type: "sub-clause", text: `2.1 The Resident shall pay a Monthly License Fee of Rs. ${inr(d.monthlyRent)}/- (Rupees ${amountInWords(d.monthlyRent)} only) payable on or before the 5th day of each calendar month via UPI/Bank Transfer to the Owner's designated account.`, indent: 1 });
   } else if (d.instalments?.length) {
     const count = d.instalments.length;
     const total = d.instalments.reduce((sum, i) => sum + (i.amount || 0), 0);
-    let text = `2.1 The Resident shall pay the License Fee of Rs. ${inr(total)}/- in ${count} instalment(s) via UPI/Bank Transfer to the Owner's designated account:`;
+    let text = `2.1 The Resident shall pay the License Fee of Rs. ${inr(total)}/- (Rupees ${amountInWords(total)} only) in ${count} instalment(s) via UPI/Bank Transfer to the Owner's designated account:`;
     d.instalments.forEach((inst, idx) => {
-      text += ` (${String.fromCharCode(97 + idx)}) Instalment ${idx + 1} of Rs. ${inr(inst.amount)}/- due on ${fmtDate(inst.dueDate)};`;
+      text += ` (${String.fromCharCode(97 + idx)}) Instalment ${idx + 1} of Rs. ${inr(inst.amount)}/- (Rupees ${amountInWords(inst.amount)} only) due on ${fmtDate(inst.dueDate)};`;
     });
     text = text.replace(/;$/, ".");
     sections.push({ type: "sub-clause", text, indent: 1 });
   }
   sections.push({ type: "sub-clause", text: `2.2 In the event of late payment beyond the due date, a late payment fine of 10% of the due amount OR Rs. 1,000/-, whichever is higher, shall be levied. Intimation of dues shall be made via Crib software/WhatsApp.`, indent: 1 });
-  sections.push({ type: "sub-clause", text: `2.3 The Resident shall pay an interest-free Security Deposit of Rs. ${inr(d.securityDeposit)}/- (Rupees ${blank("")} only) at the time of execution of this Agreement. The said deposit shall be refundable at the time of vacating the premises, after deduction of any damages, pending dues, maintenance charges, or notice period shortfall, if applicable.`, indent: 1 });
+  sections.push({ type: "sub-clause", text: `2.3 The Resident shall pay an interest-free Security Deposit of Rs. ${inr(d.securityDeposit)}/- (Rupees ${amountInWords(d.securityDeposit)} only) at the time of execution of this Agreement. The said deposit shall be refundable at the time of vacating the premises, after deduction of any damages, pending dues, maintenance charges, or notice period shortfall, if applicable.`, indent: 1 });
 
   // Clause 3
   sections.push({ type: "clause-title", text: "CLAUSE 3 — MANDATORY LOCK-IN & NOTICE PERIOD", bold: true });
@@ -104,7 +105,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   // Clause 6
   sections.push({ type: "clause-title", text: "CLAUSE 6 — AMC (ANNUAL MAINTENANCE CHARGES)", bold: true });
-  sections.push({ type: "paragraph", text: `An Annual Maintenance Charge of Rs. ${inr(d.maintenanceCharges)}/- shall be payable per academic year at the time of admission/renewal. This charge is non-refundable and covers maintenance of furniture, fixtures, Wi-Fi infrastructure, water systems, and common areas.` });
+  sections.push({ type: "paragraph", text: `An Annual Maintenance Charge of Rs. ${inr(d.maintenanceCharges)}/- (Rupees ${amountInWords(d.maintenanceCharges)} only) shall be payable per academic year at the time of admission/renewal. This charge is non-refundable and covers maintenance of furniture, fixtures, Wi-Fi infrastructure, water systems, and common areas.` });
 
   // Clause 7
   sections.push({ type: "clause-title", text: "CLAUSE 7 — POLICE VERIFICATION & COMPLIANCE DOCUMENTS", bold: true });
