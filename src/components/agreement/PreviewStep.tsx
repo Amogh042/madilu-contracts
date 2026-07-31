@@ -1,6 +1,16 @@
 import type { AgreementData } from "@/lib/pg-data";
-import { buildAgreementSections, type AgreementSection } from "@/lib/agreement-text";
+import { buildAgreementSections, type AgreementSection, type TextSegment } from "@/lib/agreement-text";
 import { generateAgreementPDF } from "@/lib/generate-pdf";
+
+function SegmentedText({ segments }: { segments: TextSegment[] }) {
+  return (
+    <>
+      {segments.map((seg, i) =>
+        seg.bold ? <strong key={i}>{seg.text}</strong> : <span key={i}>{seg.text}</span>
+      )}
+    </>
+  );
+}
 
 type Props = {
   data: AgreementData;
@@ -25,9 +35,9 @@ function SectionRenderer({ sections }: { sections: AgreementSection[] }) {
           case "section-title":
             return <h5 key={i} className="font-bold mt-5 mb-2 text-[14px] uppercase tracking-wide">{sec.text}</h5>;
           case "paragraph":
-            return <p key={i} className="mb-3">{sec.text}</p>;
+            return <p key={i} className="mb-3">{sec.segments ? <SegmentedText segments={sec.segments} /> : sec.text}</p>;
           case "sub-clause":
-            return <p key={i} className="mb-2" style={{ paddingLeft: (sec.indent || 0) * 16 }}>{sec.text}</p>;
+            return <p key={i} className="mb-2" style={{ paddingLeft: (sec.indent || 0) * 16 }}>{sec.segments ? <SegmentedText segments={sec.segments} /> : sec.text}</p>;
           case "signature-row":
             if (sec.columns && sec.columns.length === 2) {
               return (

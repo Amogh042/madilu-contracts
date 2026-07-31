@@ -46,9 +46,19 @@ const WORD_MAP: Record<number, string> = {
 };
 const numberToWordsForMonths = (n: number): string => WORD_MAP[n] || String(n);
 
+export type TextSegment = { text: string; bold?: boolean };
+
+const B = (v: string): TextSegment => ({ text: v, bold: true });
+const T = (v: string): TextSegment => ({ text: v });
+const segs = (...parts: (string | TextSegment)[]): { text: string; segments: TextSegment[] } => {
+  const segments = parts.map(p => typeof p === "string" ? T(p) : p);
+  return { text: segments.map(s => s.text).join(""), segments };
+};
+
 export type AgreementSection = {
   type: "header" | "subheader" | "paragraph" | "clause-title" | "sub-clause" | "signature-row" | "witness-row" | "note" | "section-title" | "blank-space";
   text: string;
+  segments?: TextSegment[];
   bold?: boolean;
   indent?: number;
   columns?: string[];
@@ -62,23 +72,85 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   sections.push({ type: "subheader", text: "Kumaraswamy Layout, Bengaluru, Karnataka" });
   sections.push({ type: "header", text: "PAYING GUEST LICENSE AGREEMENT", bold: true });
 
-  sections.push({ type: "paragraph", text: `This Paying Guest License Agreement is made and executed at Bengaluru on this ${fmtDay(d.startDate)} day of ${fmtMonthYear(d.startDate)}.` });
+  const intro = segs(
+    "This Paying Guest License Agreement is made and executed at Bengaluru on this ",
+    B(fmtDay(d.startDate)),
+    " day of ",
+    B(fmtMonthYear(d.startDate)),
+    "."
+  );
+  sections.push({ type: "paragraph", ...intro });
 
   sections.push({ type: "clause-title", text: "BETWEEN", bold: true });
 
-  sections.push({ type: "paragraph", text: `FIRST PARTY / OWNER: Madilu PG Accommodation, a proprietorship concern, represented by its Proprietor ${blank(d.ownerName)}, S/o ${blank(d.ownerFatherName)}, aged ${blank(d.ownerAge)} years, residing at ${blank(d.pgAddress)} (hereinafter referred to as the "Owner", which expression shall, unless repugnant to the context, include his/her heirs, successors, legal representatives and assigns).` });
+  const firstParty = segs(
+    "FIRST PARTY / OWNER: Madilu PG Accommodation, a proprietorship concern, represented by its Proprietor ",
+    B(blank(d.ownerName)),
+    ", S/o ",
+    B(blank(d.ownerFatherName)),
+    ", aged ",
+    B(blank(d.ownerAge)),
+    " years, residing at ",
+    blank(d.pgAddress),
+    ' (hereinafter referred to as the "Owner", which expression shall, unless repugnant to the context, include his/her heirs, successors, legal representatives and assigns).'
+  );
+  sections.push({ type: "paragraph", ...firstParty });
 
   const relationLabel = s.guardianRelation ? `${s.guardianRelation}` : "Son/Daughter of";
-  sections.push({ type: "paragraph", text: `SECOND PARTY / RESIDENT: ${blank(s.name)}, ${relationLabel} ${blank(s.guardianName)}, aged ${blank(d.residentAge)} years, permanent address: ${blank(s.permanentAddress)}, currently studying at ${blank(d.residentCollege)}, Student ID: ${blank(d.residentStudentId)}, Aadhaar No: ${blank(d.residentAadhaar)}, Mobile: ${blank(s.contactNumber)}, Email: ${blank(s.email)} (hereinafter referred to as the "Resident").` });
+  const secondParty = segs(
+    "SECOND PARTY / RESIDENT: ",
+    B(blank(s.name)),
+    `, ${relationLabel} `,
+    B(blank(s.guardianName)),
+    ", aged ",
+    B(blank(d.residentAge)),
+    " years, permanent address: ",
+    blank(s.permanentAddress),
+    ", currently studying at ",
+    blank(d.residentCollege),
+    ", Student ID: ",
+    blank(d.residentStudentId),
+    ", Aadhaar No: ",
+    blank(d.residentAadhaar),
+    ", Mobile: ",
+    blank(s.contactNumber),
+    ", Email: ",
+    blank(s.email),
+    ' (hereinafter referred to as the "Resident").'
+  );
+  sections.push({ type: "paragraph", ...secondParty });
 
-  sections.push({ type: "paragraph", text: `THIRD PARTY / GUARANTOR/PARENT: ${blank(s.guardianName)}, aged ${blank(d.parentAge)} years, residing at ${blank(s.guardianAddress)}, Mobile: ${blank(s.guardianPhone)}, Email: ${blank(s.guardianEmail)} (hereinafter referred to as the "Guarantor/Parent").` });
+  const thirdParty = segs(
+    "THIRD PARTY / GUARANTOR/PARENT: ",
+    B(blank(s.guardianName)),
+    ", aged ",
+    B(blank(d.parentAge)),
+    " years, residing at ",
+    blank(s.guardianAddress),
+    ", Mobile: ",
+    blank(s.guardianPhone),
+    ", Email: ",
+    blank(s.guardianEmail),
+    ' (hereinafter referred to as the "Guarantor/Parent").'
+  );
+  sections.push({ type: "paragraph", ...thirdParty });
 
   sections.push({ type: "clause-title", text: "WHEREAS", bold: true });
 
   sections.push({ type: "sub-clause", text: "A. The Owner is running and managing a Paying Guest accommodation facility under the name and style of \"Madilu PG Accommodation\" at Kumaraswamy Layout, Bengaluru, Karnataka.", indent: 1 });
+
   const monthsDuration = calcMonths(d.startDate, d.endDate);
   const monthsLabel = `${monthsDuration} (${numberToWordsForMonths(monthsDuration)}) months`;
-  sections.push({ type: "sub-clause", text: `B. The Resident has approached the Owner seeking accommodation as a Paying Guest in Room No. ${blank(d.roomNumber)} of the said PG facility for a period of ${monthsLabel}.`, indent: 1 });
+
+  const clauseB = segs(
+    "B. The Resident has approached the Owner seeking accommodation as a Paying Guest in Room No. ",
+    B(blank(d.roomNumber)),
+    " of the said PG facility for a period of ",
+    B(monthsLabel),
+    "."
+  );
+  sections.push({ type: "sub-clause", ...clauseB, indent: 1 });
+
   sections.push({ type: "sub-clause", text: "C. The Owner has agreed to grant a temporary license to the Resident for use and occupation of a bed space in the said room, subject to the terms and conditions set forth herein.", indent: 1 });
 
   sections.push({ type: "paragraph", text: "NOW THEREFORE, in consideration of the mutual covenants and agreements herein contained, the Parties agree as follows:" });
@@ -86,28 +158,70 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   // Clause 1
   sections.push({ type: "clause-title", text: "CLAUSE 1 — NATURE OF AGREEMENT & DURATION", bold: true });
   sections.push({ type: "sub-clause", text: "1.1 This Agreement is a temporary, revocable license to use and occupy a bed space in the designated room of the PG facility. It does not create any tenancy, lease, sub-lease, or any right of exclusive possession in favour of the Resident. The physical possession of the premises shall at all times remain with the Owner.", indent: 1 });
-  sections.push({ type: "sub-clause", text: `1.2 This License shall be valid for a period of ${monthsLabel} commencing from ${fmtDate(d.startDate)} and ending on ${fmtDate(d.endDate)}.`, indent: 1 });
+
+  const clause12 = segs(
+    "1.2 This License shall be valid for a period of ",
+    B(monthsLabel),
+    " commencing from ",
+    B(fmtDate(d.startDate)),
+    " and ending on ",
+    B(fmtDate(d.endDate)),
+    "."
+  );
+  sections.push({ type: "sub-clause", ...clause12, indent: 1 });
 
   // Clause 2
   sections.push({ type: "clause-title", text: "CLAUSE 2 — LICENSE FEE & SECURITY DEPOSIT", bold: true });
   if (d.paymentMode === "Monthly") {
-    sections.push({ type: "sub-clause", text: `2.1 The Resident shall pay a Monthly License Fee of Rs. ${inr(d.monthlyRent)}/- (Rupees ${amountInWords(d.monthlyRent)} only) payable on or before the 5th day of each calendar month via UPI/Bank Transfer to the Owner's designated account.`, indent: 1 });
+    const clause21m = segs(
+      "2.1 The Resident shall pay a Monthly License Fee of Rs. ",
+      B(`${inr(d.monthlyRent)}/-`),
+      " (Rupees ",
+      B(amountInWords(d.monthlyRent)),
+      " only) payable on or before the 5th day of each calendar month via UPI/Bank Transfer to the Owner's designated account."
+    );
+    sections.push({ type: "sub-clause", ...clause21m, indent: 1 });
   } else if (d.instalments?.length) {
     const count = d.instalments.length;
     const total = d.instalments.reduce((sum, i) => sum + (i.amount || 0), 0);
-    let text = `2.1 The Resident shall pay the License Fee of Rs. ${inr(total)}/- (Rupees ${amountInWords(total)} only) in ${count} instalment(s) via UPI/Bank Transfer to the Owner's designated account:`;
+    const parts: (string | TextSegment)[] = [
+      "2.1 The Resident shall pay the License Fee of Rs. ",
+      B(`${inr(total)}/-`),
+      " (Rupees ",
+      B(amountInWords(total)),
+      `) only) in ${count} instalment(s) via UPI/Bank Transfer to the Owner's designated account:`,
+    ];
     d.instalments.forEach((inst, idx) => {
-      text += ` (${String.fromCharCode(97 + idx)}) Instalment ${idx + 1} of Rs. ${inr(inst.amount)}/- (Rupees ${amountInWords(inst.amount)} only) due on ${fmtDate(inst.dueDate)};`;
+      parts.push(` (${String.fromCharCode(97 + idx)}) Instalment ${idx + 1} of Rs. `);
+      parts.push(B(`${inr(inst.amount)}/-`));
+      parts.push(" (Rupees ");
+      parts.push(B(amountInWords(inst.amount)));
+      parts.push(" only) due on ");
+      parts.push(B(fmtDate(inst.dueDate)));
+      parts.push(idx === d.instalments!.length - 1 ? "." : ";");
     });
-    text = text.replace(/;$/, ".");
-    sections.push({ type: "sub-clause", text, indent: 1 });
+    const clause21i = segs(...parts);
+    sections.push({ type: "sub-clause", ...clause21i, indent: 1 });
   }
-  sections.push({ type: "sub-clause", text: `2.2 In the event of late payment beyond the due date, a late payment fine of 10% of the due amount OR Rs. 1,000/-, whichever is higher, shall be levied. Intimation of dues shall be made via Crib software/WhatsApp.`, indent: 1 });
-  sections.push({ type: "sub-clause", text: `2.3 The Resident shall pay an interest-free Security Deposit of Rs. ${inr(d.securityDeposit)}/- (Rupees ${amountInWords(d.securityDeposit)} only) at the time of execution of this Agreement. The said deposit shall be refundable at the time of vacating the premises, after deduction of any damages, pending dues, maintenance charges, or notice period shortfall, if applicable.`, indent: 1 });
+  sections.push({ type: "sub-clause", text: "2.2 In the event of late payment beyond the due date, a late payment fine of 10% of the due amount OR Rs. 1,000/-, whichever is higher, shall be levied. Intimation of dues shall be made via Crib software/WhatsApp.", indent: 1 });
+
+  const clause23 = segs(
+    "2.3 The Resident shall pay an interest-free Security Deposit of Rs. ",
+    B(`${inr(d.securityDeposit)}/-`),
+    " (Rupees ",
+    B(amountInWords(d.securityDeposit)),
+    " only) at the time of execution of this Agreement. The said deposit shall be refundable at the time of vacating the premises, after deduction of any damages, pending dues, maintenance charges, or notice period shortfall, if applicable."
+  );
+  sections.push({ type: "sub-clause", ...clause23, indent: 1 });
 
   // Clause 3
   sections.push({ type: "clause-title", text: "CLAUSE 3 — MANDATORY LOCK-IN & NOTICE PERIOD", bold: true });
-  sections.push({ type: "sub-clause", text: `3.1 There shall be a mandatory lock-in period of ${monthsLabel} from the date of commencement. In the event of early exit by the Resident during the lock-in period, the balance rent for the remaining months shall become immediately payable and the entire Security Deposit shall stand forfeited.`, indent: 1 });
+  const clause31 = segs(
+    "3.1 There shall be a mandatory lock-in period of ",
+    B(monthsLabel),
+    " from the date of commencement. In the event of early exit by the Resident during the lock-in period, the balance rent for the remaining months shall become immediately payable and the entire Security Deposit shall stand forfeited."
+  );
+  sections.push({ type: "sub-clause", ...clause31, indent: 1 });
   sections.push({ type: "sub-clause", text: "3.2 After completion of the lock-in period, the Resident shall provide a minimum of 30 (Thirty) days written notice via WhatsApp/Email before vacating. Failure to provide such notice shall result in deduction of one month's rent from the Security Deposit.", indent: 1 });
 
   // Clause 4
@@ -125,7 +239,14 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   // Clause 6
   sections.push({ type: "clause-title", text: "CLAUSE 6 — AMC (ANNUAL MAINTENANCE CHARGES)", bold: true });
-  sections.push({ type: "paragraph", text: `An Annual Maintenance Charge of Rs. ${inr(d.maintenanceCharges)}/- (Rupees ${amountInWords(d.maintenanceCharges)} only) shall be payable per academic year at the time of admission/renewal. This charge is non-refundable and covers maintenance of furniture, fixtures, Wi-Fi infrastructure, water systems, and common areas.` });
+  const clause6 = segs(
+    "An Annual Maintenance Charge of Rs. ",
+    B(`${inr(d.maintenanceCharges)}/-`),
+    " (Rupees ",
+    B(amountInWords(d.maintenanceCharges)),
+    " only) shall be payable per academic year at the time of admission/renewal. This charge is non-refundable and covers maintenance of furniture, fixtures, Wi-Fi infrastructure, water systems, and common areas."
+  );
+  sections.push({ type: "paragraph", ...clause6 });
 
   // Clause 7
   sections.push({ type: "clause-title", text: "CLAUSE 7 — POLICE VERIFICATION & COMPLIANCE DOCUMENTS", bold: true });

@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import type { AgreementData } from "./pg-data";
-import { buildAgreementSections, type AgreementSection } from "./agreement-text";
+import { buildAgreementSections, type AgreementSection, type TextSegment } from "./agreement-text";
 
 const PAGE_W = 210;
 const PAGE_H = 297;
@@ -47,6 +47,80 @@ export function generateAgreementPDF(d: AgreementData) {
     doc.text(text, (PAGE_W - tw) / 2, y);
     doc.setFont("times", "normal");
     doc.setFontSize(FONT_SIZE);
+  };
+
+  const renderSegmented = (segments: TextSegment[], maxW: number, leftOffset = 0) => {
+    const fullText = segments.map(s => s.text).join("");
+    const boldMap: boolean[] = [];
+    for (const seg of segments) {
+      for (let c = 0; c < seg.text.length; c++) boldMap.push(!!seg.bold);
+    }
+
+    type WordRun = { text: string; bold: boolean };
+    type SegWord = { runs: WordRun[] };
+    const segWords: SegWord[] = [];
+    const re = /\S+/g;
+    let match;
+    while ((match = re.exec(fullText)) !== null) {
+      const runs: WordRun[] = [];
+      let curBold = boldMap[match.index];
+      let cur = "";
+      for (let c = 0; c < match[0].length; c++) {
+        const b = boldMap[match.index + c];
+        if (b !== curBold) {
+          if (cur) runs.push({ text: cur, bold: curBold });
+          curBold = b;
+          cur = match[0][c];
+        } else {
+          cur += match[0][c];
+        }
+      }
+      if (cur) runs.push({ text: cur, bold: curBold });
+      segWords.push({ runs });
+    }
+
+    const measureWord = (sw: SegWord) => {
+      let w = 0;
+      for (const r of sw.runs) {
+        doc.setFont("times", r.bold ? "bold" : "normal");
+        w += doc.getTextWidth(r.text);
+      }
+      return w;
+    };
+
+    doc.setFont("times", "normal");
+    const spW = doc.getTextWidth(" ");
+
+    let lineWords: SegWord[] = [];
+    let lineW = 0;
+
+    const flushLine = () => {
+      if (!lineWords.length) return;
+      ensure(LINE_H);
+      let x = LEFT + leftOffset;
+      for (let i = 0; i < lineWords.length; i++) {
+        if (i > 0) x += spW;
+        for (const r of lineWords[i].runs) {
+          doc.setFont("times", r.bold ? "bold" : "normal");
+          doc.text(r.text, x, y);
+          x += doc.getTextWidth(r.text);
+        }
+      }
+      y += LINE_H;
+      lineWords = [];
+      lineW = 0;
+    };
+
+    for (const sw of segWords) {
+      const ww = measureWord(sw);
+      const needed = lineWords.length > 0 ? spW + ww : ww;
+      if (lineW + needed > maxW && lineWords.length > 0) flushLine();
+      if (lineWords.length > 0) lineW += spW;
+      lineWords.push(sw);
+      lineW += ww;
+    }
+    flushLine();
+    doc.setFont("times", "normal");
   };
 
   const renderSection = (sec: AgreementSection) => {
@@ -96,7 +170,11 @@ export function generateAgreementPDF(d: AgreementData) {
         } else if (remaining() < 3 * LINE_H) {
           newPage();
         }
-        writeLines(lines);
+        if (sec.segments) {
+          renderSegmented(sec.segments, TEXT_W);
+        } else {
+          writeLines(lines);
+        }
         y += 1.5;
         break;
       }
@@ -110,7 +188,11 @@ export function generateAgreementPDF(d: AgreementData) {
         } else if (remaining() < 3 * LINE_H) {
           newPage();
         }
-        writeLines(lines, indent);
+        if (sec.segments) {
+          renderSegmented(sec.segments, TEXT_W - indent, indent);
+        } else {
+          writeLines(lines, indent);
+        }
         y += 1.5;
         break;
       }
