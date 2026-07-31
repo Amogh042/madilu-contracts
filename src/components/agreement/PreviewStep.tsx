@@ -38,6 +38,25 @@ function SectionRenderer({ sections }: { sections: AgreementSection[] }) {
               );
             }
             return <pre key={i} className="mt-4 mb-2 text-sm whitespace-pre-wrap font-serif">{sec.text}</pre>;
+          case "witness-row":
+            if (sec.columns && sec.columns.length === 2) {
+              return (
+                <div key={i} className="grid grid-cols-2 gap-8 mt-2 mb-4">
+                  {sec.columns.map((col, ci) => {
+                    const lines = col.split("\n").filter(l => !l.includes("[Signature Box]"));
+                    return (
+                      <div key={ci}>
+                        <pre className="text-sm whitespace-pre-wrap font-serif">{lines.join("\n")}</pre>
+                        <div className="border border-gray-400 rounded w-40 h-16 mt-2" />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+            return null;
+          case "blank-space":
+            return <div key={i} className="h-24" />;
           case "note":
             return <p key={i} className="mt-6 text-xs italic text-gray-500 whitespace-pre-wrap">{sec.text}</p>;
           default:

@@ -109,10 +109,10 @@ function ManagerDashboard() {
   const handleSelect = (s: Student) => {
     setSelected(s);
     if (editingId && data) {
-      setData({ ...data, student: s });
+      setData({ ...data, student: s, createdByManagerName: session.name });
     } else {
       const singlePg = session.pgNames.length === 1 ? session.pgNames[0] : undefined;
-      setData(initialAgreement(s, singlePg));
+      setData({ ...initialAgreement(s, singlePg), createdByManagerName: session.name });
     }
   };
 
@@ -120,7 +120,7 @@ function ManagerDashboard() {
     const ad = rowToAgreementData(a);
     setEditingId(a.id);
     setSelected(ad.student);
-    setData(ad);
+    setData({ ...ad, createdByManagerName: ad.createdByManagerName || session.name });
     setStep(1);
     setView("flow");
   };
