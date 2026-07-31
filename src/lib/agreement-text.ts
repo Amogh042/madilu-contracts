@@ -72,11 +72,15 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   sections.push({ type: "subheader", text: "Kumaraswamy Layout, Bengaluru, Karnataka" });
   sections.push({ type: "header", text: "PAYING GUEST LICENSE AGREEMENT", bold: true });
 
+  const today = new Date();
+  const todayDay = String(today.getDate());
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const todayMonthYear = `${monthNames[today.getMonth()]} ${today.getFullYear()}`;
   const intro = segs(
     "This Paying Guest License Agreement is made and executed at Bengaluru on this ",
-    B(fmtDay(d.startDate)),
+    B(todayDay),
     " day of ",
-    B(fmtMonthYear(d.startDate)),
+    B(todayMonthYear),
     "."
   );
   sections.push({ type: "paragraph", ...intro });
