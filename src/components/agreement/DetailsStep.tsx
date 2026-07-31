@@ -70,9 +70,21 @@ const DateField = ({ value, onChange }: { value: string; onChange: (v: string) =
   );
 };
 
+const calcMonthsBetween = (startIso: string, endIso: string): number => {
+  if (!startIso || !endIso) return 12;
+  const [sy, sm, sd] = startIso.split("-").map(Number);
+  const [ey, em, ed] = endIso.split("-").map(Number);
+  const s = new Date(sy, sm - 1, sd, 12, 0, 0);
+  const e = new Date(ey, em - 1, ed, 12, 0, 0);
+  let months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+  if (e.getDate() >= s.getDate()) months += 1;
+  return months || 12;
+};
+
 export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPgs }: Props) {
   const effectiveLockedPg = lockedPg || (allowedPgs?.length === 1 ? allowedPgs[0] : undefined);
   const pgOptions = allowedPgs && allowedPgs.length > 1 ? allowedPgs : PG_LIST;
+  const [totalManual, setTotalManual] = useState(false);
   const calculateEndDate = (startDate: string): string => {
     const start = new Date(startDate + "T12:00:00");
     const end = new Date(start);
@@ -89,6 +101,20 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
       setData({ ...data, endDate: calculateEndDate(data.startDate) });
     }
   }, [data.startDate]);
+
+  useEffect(() => {
+    if (totalManual) return;
+    let auto = 0;
+    if (data.paymentMode === "Monthly") {
+      const months = calcMonthsBetween(data.startDate, data.endDate);
+      auto = Math.round(data.monthlyRent * months);
+    } else if (data.instalments?.length) {
+      auto = Math.round(data.instalments.reduce((sum, i) => sum + (i.amount || 0), 0));
+    }
+    if (auto !== (data.totalAmount || 0)) {
+      setData({ ...data, totalAmount: auto });
+    }
+  }, [data.monthlyRent, data.startDate, data.endDate, data.paymentMode, data.instalments, totalManual]);
 
   const update = <K extends keyof AgreementData>(k: K, v: AgreementData[K]) => setData({ ...data, [k]: v });
 
@@ -283,6 +309,20 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
             <Field label="Security Deposit (₹)"><input type="number" step="1" className={inputCls + " font-mono"} value={data.securityDeposit || ""} onChange={e => update("securityDeposit", Math.round(Number(e.target.value)))} placeholder="0" /></Field>
             <Field label="AMC / Maintenance (₹)"><input type="number" step="1" className={inputCls + " font-mono"} value={data.maintenanceCharges || ""} onChange={e => update("maintenanceCharges", Math.round(Number(e.target.value)))} placeholder="0" /></Field>
           </div>
+
+          <Field label="Total Amount (₹)">
+            <input type="number" step="1" className={inputCls + " font-mono"} value={data.totalAmount || ""}
+              onChange={e => {
+                const v = e.target.value;
+                if (v === "" || v === "0") {
+                  setTotalManual(false);
+                  update("totalAmount", 0);
+                } else {
+                  setTotalManual(true);
+                  update("totalAmount", Math.round(Number(v)));
+                }
+              }} placeholder="Auto-calculated" />
+          </Field>
         </div>
       </div>
 

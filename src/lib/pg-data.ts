@@ -94,6 +94,7 @@ export type AgreementData = {
   endDate: string;
   securityDeposit: number;
   maintenanceCharges: number;
+  totalAmount?: number;
   createdByManagerName?: string;
 };
 

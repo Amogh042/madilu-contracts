@@ -47,6 +47,7 @@ export function agreementDataToRow(d: AgreementData, managerId: string | null) {
     rentValue = d.instalments.reduce((sum, i) => sum + (i.amount || 0), 0);
     snapObj.instalments = d.instalments;
   }
+  if (d.totalAmount) snapObj.totalAmount = d.totalAmount;
   if (d.createdByManagerName) snapObj.createdByManagerName = d.createdByManagerName;
   const snapshot = Object.keys(snapObj).length ? JSON.stringify(snapObj) : null;
 
@@ -88,6 +89,7 @@ export function agreementDataToRow(d: AgreementData, managerId: string | null) {
 export function rowToAgreementData(r: DbAgreement): AgreementData {
   let instalments: Instalment[] | undefined;
   let createdByManagerName: string | undefined;
+  let totalAmount: number | undefined;
   if (r.agreement_text_snapshot) {
     try {
       const snap = JSON.parse(r.agreement_text_snapshot);
@@ -100,6 +102,7 @@ export function rowToAgreementData(r: DbAgreement): AgreementData {
         if (legacy.length) instalments = legacy;
       }
       if (snap.createdByManagerName) createdByManagerName = snap.createdByManagerName;
+      if (snap.totalAmount) totalAmount = snap.totalAmount;
     } catch {}
   }
 
@@ -150,6 +153,7 @@ export function rowToAgreementData(r: DbAgreement): AgreementData {
     endDate: r.end_date || "",
     securityDeposit: r.security_deposit || 0,
     maintenanceCharges: r.maintenance_charges || 0,
+    totalAmount,
     createdByManagerName,
   };
 }
