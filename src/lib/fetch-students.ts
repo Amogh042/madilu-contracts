@@ -1,35 +1,42 @@
 import Papa from "papaparse";
 import { GOOGLE_SHEET_CSV_URL, type Student } from "./pg-data";
 
-const COLUMN_MAP: Record<string, keyof Student> = {
-  "Timestamp": "timestamp",
-  "Full Name (as per Aadhaar)": "name",
-  "Date of Birth": "dob",
-  "Contact Number": "contactNumber",
-  "Email Address": "email",
-  "Permanent Address (Full residential address)": "permanentAddress",
-  "Age": "age",
-  "College Name": "collegeName",
-  "College ID Number": "studentId",
-  "Parent/Guardian Full Name": "guardianName",
-  "Parent/Guardian Address (Full residential address)": "guardianAddress",
-  "Parent/Guardian Contact Number": "guardianPhone",
-  "Parent/Guardian Email Address": "guardianEmail",
-  "Parent/Guardian Age": "guardianAge",
-  "Relationship with Student (S/o, D/o, W/o)": "guardianRelation",
-  "Select PG Option": "pgOption",
-  "Preferred Payment Mode": "paymentMode",
-  "Declaration of Accuracy and Agreement to Terms": "declaration",
-  "Gender": "gender",
-};
-
-function mapColumnToField(header: string): keyof Student | null {
-  if (COLUMN_MAP[header]) return COLUMN_MAP[header];
-  const headerLower = header.toLowerCase().trim();
-  for (const [col, field] of Object.entries(COLUMN_MAP)) {
-    if (col.toLowerCase().trim() === headerLower) return field;
+function getField(row: Record<string, string>, ...keys: string[]): string {
+  for (const key of keys) {
+    if (row[key] !== undefined && row[key]?.trim()) return row[key].trim();
+    const found = Object.keys(row).find(k => k.trim().toLowerCase() === key.toLowerCase());
+    if (found && row[found]?.trim()) return row[found].trim();
   }
-  return null;
+  for (const key of keys) {
+    const kl = key.toLowerCase();
+    const partial = Object.keys(row).find(k => k.toLowerCase().includes(kl) || kl.includes(k.toLowerCase()));
+    if (partial && row[partial]?.trim()) return row[partial].trim();
+  }
+  return "";
+}
+
+function parseStudentRow(row: Record<string, string>): Student {
+  return {
+    timestamp: getField(row, "Timestamp"),
+    name: getField(row, "Full Name (as per Aadhaar)", "Full Name", "Name", "Student Name"),
+    dob: getField(row, "Date of Birth", "DOB", "Birth Date"),
+    contactNumber: getField(row, "Contact Number", "Phone Number", "Mobile Number", "Phone", "Mobile"),
+    email: getField(row, "Email Address", "Email", "Student Email"),
+    permanentAddress: getField(row, "Permanent Address (Full residential address)", "Permanent Address", "Address"),
+    age: getField(row, "Age"),
+    collegeName: getField(row, "College Name", "College"),
+    studentId: getField(row, "College ID Number", "Student ID", "College ID", "Roll Number"),
+    guardianName: getField(row, "Parent/Guardian Full Name", "Parent Name", "Guardian Name", "Parent/Guardian Name"),
+    guardianAddress: getField(row, "Parent/Guardian Address (Full residential address)", "Parent/Guardian Address", "Parent Address", "Guardian Address"),
+    guardianPhone: getField(row, "Parent/Guardian Contact Number", "Parent/Guardian Phone", "Parent Phone", "Guardian Phone", "Guardian Contact"),
+    guardianEmail: getField(row, "Parent/Guardian Email Address", "Parent/Guardian Email", "Parent Email", "Guardian Email"),
+    guardianAge: getField(row, "Parent/Guardian Age", "Guardian Age"),
+    guardianRelation: getField(row, "Relationship with Student (S/o, D/o, W/o)", "Relationship with Student", "Relation"),
+    pgOption: getField(row, "Select PG Option", "PG Option", "PG Name", "PG"),
+    paymentMode: getField(row, "Preferred Payment Mode", "Payment Mode", "Payment"),
+    declaration: getField(row, "Declaration of Accuracy and Agreement to Terms", "Declaration"),
+    gender: getField(row, "Gender"),
+  };
 }
 
 export async function fetchStudents(): Promise<Student[]> {
@@ -39,29 +46,18 @@ export async function fetchStudents(): Promise<Student[]> {
   const res = await fetch(GOOGLE_SHEET_CSV_URL);
   if (!res.ok) throw new Error(`Failed to fetch sheet (${res.status})`);
   const text = await res.text();
+  console.log("[fetchStudents] Raw CSV (first 500):", text.substring(0, 500));
+
   const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
+  console.log("[fetchStudents] CSV Headers:", parsed.meta.fields);
+  console.log("[fetchStudents] CSV rows:", parsed.data.length);
 
-  const headers = parsed.meta.fields || [];
-  const headerFieldMap = new Map<string, keyof Student>();
-  for (const h of headers) {
-    const field = mapColumnToField(h);
-    if (field) headerFieldMap.set(h, field);
-  }
+  const students = parsed.data
+    .map((row) => parseStudentRow(row))
+    .filter((s) => s.name.trim() !== "");
 
-  return parsed.data
-    .map((row): Student => {
-      const student: Student = {
-        timestamp: "", name: "", dob: "", contactNumber: "", email: "",
-        permanentAddress: "", age: "", collegeName: "", studentId: "",
-        guardianName: "", guardianAddress: "", guardianPhone: "", guardianEmail: "",
-        guardianAge: "", guardianRelation: "", pgOption: "", paymentMode: "",
-        declaration: "", gender: "",
-      };
-      for (const [header, field] of headerFieldMap) {
-        const val = row[header];
-        if (val) student[field] = String(val).trim();
-      }
-      return student;
-    })
-    .filter((s) => s.name);
+  console.log("[fetchStudents] Students with names:", students.length);
+  if (students.length > 0) console.log("[fetchStudents] First student:", students[0]);
+
+  return students;
 }
