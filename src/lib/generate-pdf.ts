@@ -120,40 +120,51 @@ export function generateAgreementPDF(d: AgreementData) {
           const leftLines = sec.columns[0].split("\n");
           const rightLines = sec.columns[1].split("\n");
           const maxLines = Math.max(leftLines.length, rightLines.length);
-          ensure(maxLines * LINE_H + 6);
-          y += 3;
+          ensure(maxLines * LINE_H + 10);
+          y += 5;
           const startY = y;
           doc.setFontSize(FONT_SIZE);
-          for (const line of leftLines) {
-            doc.text(line, LEFT, y);
+          for (let i = 0; i < leftLines.length; i++) {
+            if (i === 0) doc.setFont("times", "bold");
+            else doc.setFont("times", "normal");
+            doc.text(leftLines[i], LEFT, y);
             y += LINE_H;
           }
+          doc.setFont("times", "normal");
           y = startY;
-          for (const line of rightLines) {
-            doc.text(line, LEFT + colW + 10, y);
+          for (let i = 0; i < rightLines.length; i++) {
+            if (i === 0) doc.setFont("times", "bold");
+            else doc.setFont("times", "normal");
+            doc.text(rightLines[i], LEFT + colW + 10, y);
             y += LINE_H;
           }
-          y = startY + maxLines * LINE_H + 3;
+          doc.setFont("times", "normal");
+          y = startY + maxLines * LINE_H + 8;
         } else {
           const sigLines = sec.text.split("\n");
-          ensure(sigLines.length * LINE_H + 4);
-          y += 3;
-          for (const line of sigLines) {
-            doc.text(line, LEFT, y);
+          ensure(sigLines.length * LINE_H + 8);
+          y += 5;
+          for (let i = 0; i < sigLines.length; i++) {
+            if (i === 0) doc.setFont("times", "bold");
+            else doc.setFont("times", "normal");
+            doc.text(sigLines[i], LEFT, y);
             y += LINE_H;
           }
-          y += 3;
+          doc.setFont("times", "normal");
+          y += 8;
         }
         break;
       }
       case "witness-row": {
         if (sec.columns && sec.columns.length === 2) {
           const colW = (TEXT_W - 10) / 2;
-          const boxW = 50;
-          const boxH = 20;
-          ensure(LINE_H * 2 + boxH + 10);
+          const boxW = 55;
+          const boxH = 18;
+          const totalNeeded = LINE_H * 2 + boxH + 8;
+          ensure(totalNeeded);
           y += 3;
           doc.setFontSize(FONT_SIZE);
+          doc.setFont("times", "normal");
 
           const witness1Lines = sec.columns[0].split("\n").filter(l => !l.includes("[Signature Box]"));
           const witness2Lines = sec.columns[1].split("\n").filter(l => !l.includes("[Signature Box]"));
@@ -178,12 +189,15 @@ export function generateAgreementPDF(d: AgreementData) {
           doc.rect(rightX, y, boxW, boxH);
           const rightBoxEnd = y + boxH;
 
-          y = Math.max(leftBoxEnd, rightBoxEnd) + 5;
+          y = Math.max(leftBoxEnd, rightBoxEnd) + 8;
         }
         break;
       }
       case "blank-space": {
-        y += 45;
+        const pageMid = PAGE_H / 2;
+        if (y < pageMid) {
+          y = pageMid;
+        }
         break;
       }
       case "note":
@@ -192,7 +206,34 @@ export function generateAgreementPDF(d: AgreementData) {
   };
 
   const mainSections = buildAgreementSections(d);
-  for (const sec of mainSections) {
+
+  for (let i = 0; i < mainSections.length; i++) {
+    const sec = mainSections[i];
+    if (sec.type === "clause-title" && sec.text === "WITNESSES") {
+      const witnessRow = mainSections[i + 1];
+      if (witnessRow?.type === "witness-row") {
+        const boxH = 18;
+        const totalNeeded = LINE_H + 1 + 3 + LINE_H * 2 + 2 + boxH + 8;
+        ensure(totalNeeded);
+        renderSection(sec);
+        renderSection(witnessRow);
+        i++;
+        continue;
+      }
+    }
+    if (sec.type === "clause-title" && sec.text === "SPECIAL NOTES (If Any):") {
+      const blankSec = mainSections[i + 1];
+      y += 2;
+      doc.setFont("times", "bold");
+      doc.setFontSize(FONT_SIZE);
+      doc.text(sec.text, LEFT, y);
+      doc.setFont("times", "normal");
+      y += LINE_H + 1;
+      if (blankSec?.type === "blank-space") {
+        i++;
+      }
+      continue;
+    }
     renderSection(sec);
   }
 
