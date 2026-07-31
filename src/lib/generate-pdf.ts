@@ -182,6 +182,10 @@ export function generateAgreementPDF(d: AgreementData) {
         }
         break;
       }
+      case "blank-space": {
+        y += 45;
+        break;
+      }
       case "note":
         break;
     }

@@ -29,7 +29,7 @@ const inr = (n: number) => new Intl.NumberFormat("en-IN").format(Math.round(n ||
 const blank = (v: string) => v || "____________";
 
 export type AgreementSection = {
-  type: "header" | "subheader" | "paragraph" | "clause-title" | "sub-clause" | "signature-row" | "witness-row" | "note" | "section-title";
+  type: "header" | "subheader" | "paragraph" | "clause-title" | "sub-clause" | "signature-row" | "witness-row" | "note" | "section-title" | "blank-space";
   text: string;
   bold?: boolean;
   indent?: number;
@@ -125,6 +125,10 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
   sections.push({ type: "clause-title", text: "CLAUSE 10 — JURISDICTION", bold: true });
   sections.push({ type: "paragraph", text: "This Agreement shall be governed by and construed in accordance with the laws of India. The courts located in Bengaluru, Karnataka shall have exclusive jurisdiction over any disputes arising out of or in connection with this Agreement. Both parties agree to first attempt amicable settlement and mediation before initiating any legal proceedings." });
 
+  // Clause 11
+  sections.push({ type: "clause-title", text: "CLAUSE 11 — COMPLIANCE WITH ADMISSION FORM RULES", bold: true });
+  sections.push({ type: "paragraph", text: "The Second Party/Resident and the Third Party/Guarantor/Parent shall strictly abide by all rules, regulations, and conditions mentioned in the Admission Form signed at the time of joining. The Admission Form shall form an integral part of this Agreement, and any violation of the rules stated therein shall be treated as a breach of this Agreement." });
+
   // Signature blocks
   sections.push({ type: "signature-row", text: "", columns: [
     `FIRST PARTY / OWNER\n\n\nSignature: ______________________\nFor Madilu PG Accommodation\n${blank(d.ownerName)}, Proprietor`,
@@ -139,6 +143,9 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
     `1.\nName: ${witness1Name}\n[Signature Box]`,
     `2.\nName: ______________________\n[Signature Box]`,
   ]});
+
+  sections.push({ type: "clause-title", text: "SPECIAL NOTES (If Any):", bold: true });
+  sections.push({ type: "blank-space", text: "" });
 
   return sections;
 }
