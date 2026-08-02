@@ -26,6 +26,9 @@ import {
 import { fetchTemplate, saveTemplate } from "@/lib/template-db";
 import { buildAgreementSections, type AgreementSection } from "@/lib/agreement-text";
 import { PG_LIST, PG_ADDRESSES, type AgreementData, type Student } from "@/lib/pg-data";
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/owner/dashboard")({
@@ -34,6 +37,7 @@ export const Route = createFileRoute("/owner/dashboard")({
 
 const inr = (n: number) => new Intl.NumberFormat("en-IN").format(Math.round(n || 0));
 const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
+const triggerCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-all hover:border-[#D4A853]/40 data-[state=open]:border-[#D4A853]/60 data-[placeholder]:text-white/40";
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/15 text-yellow-300",
   approved: "bg-green-500/15 text-green-300",
@@ -565,16 +569,28 @@ function OwnerDashboard() {
               onChange={e => setAgreementSearch(e.target.value)}
             />
             <div className="flex gap-3 flex-wrap">
-              <select value={filterPg} onChange={e => setFilterPg(e.target.value)} className={inputCls + " w-auto min-w-[160px]"}>
-                <option value="">All PGs</option>
-                {PG_LIST.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={inputCls + " w-auto min-w-[140px]"}>
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
+              <Select value={filterPg || "__all__"} onValueChange={v => setFilterPg(v === "__all__" ? "" : v)}>
+                <SelectTrigger className={triggerCls + " w-auto min-w-[160px] h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl max-h-[300px]">
+                  <SelectItem value="__all__" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">All PGs</SelectItem>
+                  {PG_LIST.map(p => (
+                    <SelectItem key={p} value={p} className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">{p}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterStatus || "__all__"} onValueChange={v => setFilterStatus(v === "__all__" ? "" : v)}>
+                <SelectTrigger className={triggerCls + " w-auto min-w-[140px] h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl">
+                  <SelectItem value="__all__" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">All Statuses</SelectItem>
+                  <SelectItem value="pending" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">Pending</SelectItem>
+                  <SelectItem value="approved" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">Approved</SelectItem>
+                  <SelectItem value="rejected" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
               <span className="self-center text-xs text-white/40">{filteredAgreements.length} results</span>
             </div>
             <div className="glass rounded-3xl p-6">

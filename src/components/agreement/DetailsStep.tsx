@@ -184,9 +184,9 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
           <h3 className="font-display text-xl text-gold pt-3">Resident (Second Party)</h3>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Resident Age"><input className={inputCls} value={data.residentAge} onChange={e => update("residentAge", e.target.value)} placeholder="Age" /></Field>
-            <Field label="Student ID"><input className={inputCls} value={data.residentStudentId} onChange={e => update("residentStudentId", e.target.value)} placeholder="ID number" /></Field>
+            <Field label="ID"><input className={inputCls} value={data.residentStudentId} onChange={e => update("residentStudentId", e.target.value)} placeholder="ID number" /></Field>
           </div>
-          <Field label="College Name"><input className={inputCls} value={data.residentCollege} onChange={e => update("residentCollege", e.target.value)} placeholder="College / Institution" /></Field>
+          <Field label="College Name / Working At"><input className={inputCls} value={data.residentCollege} onChange={e => update("residentCollege", e.target.value)} placeholder="College / Workplace" /></Field>
           <Field label="Aadhaar Number"><input className={inputCls} value={data.residentAadhaar} onChange={e => update("residentAadhaar", e.target.value)} placeholder="Aadhaar number" /></Field>
 
           <h3 className="font-display text-xl text-gold pt-3">Parent / Guarantor (Third Party)</h3>
