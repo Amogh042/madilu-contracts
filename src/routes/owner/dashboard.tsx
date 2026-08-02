@@ -108,6 +108,7 @@ function OwnerDashboard() {
   const [templateStatus, setTemplateStatus] = useState<"" | "saved" | string>("");
 
   const [secondaryDoc, setSecondaryDoc] = useState<DbAgreement | null>(null);
+  const [resetPwMgr, setResetPwMgr] = useState<{ id: string; name: string } | null>(null);
 
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -318,6 +319,23 @@ function OwnerDashboard() {
     if (!confirm("Delete this manager?")) return;
     await deleteManager(id);
     await loadAll();
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPwMgr) return;
+    try {
+      const { error } = await supabase
+        .from("managers")
+        .update({ password_hash: null })
+        .eq("id", resetPwMgr.id);
+      if (error) throw error;
+      setSuccessMsg(`Password reset. ${resetPwMgr.name} will set a new password on next login.`);
+      setTimeout(() => setSuccessMsg(""), 5000);
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Failed to reset password");
+      setTimeout(() => setErrorMsg(""), 5000);
+    }
+    setResetPwMgr(null);
   };
 
   const startEditManager = (m: DbManager) => {
@@ -740,6 +758,7 @@ function OwnerDashboard() {
                         <button onClick={() => handleToggleManager(m)} className={`glass glass-hover rounded-lg px-3 py-2 text-xs ${m.active ? "text-yellow-300" : "text-green-300"}`}>
                           {m.active ? "Deactivate" : "Activate"}
                         </button>
+                        <button onClick={() => setResetPwMgr({ id: m.id, name: m.name })} className="glass glass-hover rounded-lg px-3 py-2 text-xs text-sky-300">Reset Password</button>
                         <button onClick={() => handleDeleteManager(m.id)} className="rounded-lg px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition">Delete</button>
                       </div>
                     </div>
@@ -846,6 +865,20 @@ function OwnerDashboard() {
         )}
         {view === "exit-preview" && secondaryDoc && (
           <SecondaryDocPreview agreement={secondaryDoc} docType="exit" onBack={() => setView("exit-pick")} />
+        )}
+
+        {/* RESET PASSWORD MODAL */}
+        {resetPwMgr && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setResetPwMgr(null)}>
+            <div className="glass rounded-3xl p-8 max-w-md w-full mx-4 animate-fade-in" onClick={e => e.stopPropagation()}>
+              <h3 className="font-display text-2xl font-bold mb-4">Reset Password</h3>
+              <p className="text-sm text-white/70 mb-6">Reset password for <span className="text-[#F5D799] font-medium">{resetPwMgr.name}</span>? They will need to set a new password on their next login.</p>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setResetPwMgr(null)} className="glass glass-hover rounded-xl px-5 py-2.5 text-sm">Cancel</button>
+                <button onClick={handleResetPassword} className="rounded-xl px-5 py-2.5 text-sm bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 transition font-semibold">Yes, Reset</button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* REJECT MODAL */}
