@@ -15,6 +15,7 @@ const fmtDate = (iso: string) => {
 };
 
 const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
+const selectCls = "input-glow w-full bg-[#111114]/90 border border-[#D4A853]/30 rounded-xl px-4 py-2.5 text-sm text-[#F5D799] placeholder:text-white/30 transition-all hover:border-[#D4A853]/50 focus:border-[#D4A853]/70 focus:outline-none focus:ring-2 focus:ring-[#D4A853]/20";
 
 const emptyManual = {
   student_name: "",
@@ -128,8 +129,8 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
           <input className={inputCls} placeholder="Age" value={form.resident_age} onChange={e => setForm({ ...form, resident_age: e.target.value })} />
           <input className={inputCls} placeholder="Guardian Name" value={form.guardian_name} onChange={e => setForm({ ...form, guardian_name: e.target.value })} />
           <input className={inputCls} placeholder="Guardian Phone" value={form.guardian_phone} onChange={e => setForm({ ...form, guardian_phone: e.target.value })} />
-          <select className={inputCls} value={form.pg_name} onChange={e => setForm({ ...form, pg_name: e.target.value })}>
-            {PG_LIST.map(p => <option key={p} value={p}>{p}</option>)}
+          <select className={selectCls} value={form.pg_name} onChange={e => setForm({ ...form, pg_name: e.target.value })}>
+            {PG_LIST.map(p => <option key={p} value={p} className="bg-[#111114] text-[#F5D799]">{p}</option>)}
           </select>
           <input className={inputCls} placeholder="Room Number" value={form.room_number} onChange={e => setForm({ ...form, room_number: e.target.value })} />
           <input className={inputCls} placeholder="Monthly Rent" type="number" value={form.monthly_rent || ""} onChange={e => setForm({ ...form, monthly_rent: Number(e.target.value) })} />

@@ -263,7 +263,7 @@ export function buildAgreementSections(d: AgreementData): AgreementSection[] {
 
   // Clause 7
   sections.push({ type: "clause-title", text: "CLAUSE 7 — POLICE VERIFICATION & COMPLIANCE DOCUMENTS", bold: true });
-  sections.push({ type: "paragraph", text: "The Resident and Parent/Guarantor have submitted copies of Aadhaar Card, College ID, and Parent/Guardian ID at the time of admission. The Resident hereby provides consent for police verification through the Karnataka State Police (KSP) portal as required by law." });
+  sections.push({ type: "paragraph", text: "The Second Party/Resident and Third Party/Guarantor/Parent shall submit copies of Aadhaar Card, College ID, and Parent/Guardian ID at the time of admission. The Resident hereby provides consent for police verification through the Karnataka State Police (KSP) portal as required by law." });
 
   // Clause 8
   sections.push({ type: "clause-title", text: "CLAUSE 8 — LIABILITY & PERSONAL BELONGINGS", bold: true });
