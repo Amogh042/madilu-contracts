@@ -300,7 +300,7 @@ export function generateExitPDF(a: DbAgreement) {
   );
   writeLine("2. Room & Property: Room, keys, ID card handed over in good condition.", false, 11, 3);
   writeLine(
-    `3. Security Deposit: Kindly refund Rs. ${inr(a.security_deposit)}/- to UPI/Bank A/c: ____________ after deducting damages, if any.`,
+    "3. Security Deposit: Will be adjusted / refunded, Rs. ____________ to UPI/Bank A/c: ____________ after deducting damages, if any.",
     false,
     11,
     3,
