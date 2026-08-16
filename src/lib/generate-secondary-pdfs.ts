@@ -330,21 +330,41 @@ export function generateExitPDF(a: DbAgreement) {
   doc.setFontSize(11);
   y += 8;
 
-  writeLine(
-    `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ${blank(a.room_number)} has vacated Madilu PG Accommodation on ____________.`,
-  );
-  writeGap();
+  const studentCopyBoxX = LEFT;
+  const studentCopyBoxY = y + 2;
+  const studentCopyBoxW = TEXT_W;
+  const studentCopyBoxH = 58;
+  const studentCopyPad = 5;
 
-  writeLine("All dues cleared / adjusted.");
-  writeGap();
+  doc.rect(studentCopyBoxX, studentCopyBoxY, studentCopyBoxW, studentCopyBoxH);
+  let boxCursorY = studentCopyBoxY + studentCopyPad + 3;
 
-  writeLine(
-    `Security Deposit of Rs. ${inr(a.security_deposit)}/- has been refunded / adjusted on ____________.`,
-  );
-  writeGap();
+  const studentCopyLines = [
+    `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ____________ has vacated Madilu PG Accommodation on ____________.`,
+    "",
+    "All dues cleared / adjusted.",
+    "",
+    "Security Deposit of Rs. ____________ has been refunded / adjusted on ____________.",
+    "",
+    "No further claims from either side.",
+  ];
 
-  writeLine("No further claims from either side.");
-  writeGap(3);
+  for (const line of studentCopyLines) {
+    const wrapped = doc.splitTextToSize(line, studentCopyBoxW - studentCopyPad * 2);
+    for (const wrappedLine of wrapped) {
+      doc.text(wrappedLine, studentCopyBoxX + studentCopyPad, boxCursorY);
+      boxCursorY += 5.2;
+    }
+    if (line === "") {
+      boxCursorY += 1;
+    }
+  }
+
+  const sealY = studentCopyBoxY + studentCopyBoxH - 12;
+  doc.text("Seal & Signature of Madilu PG Accommodation", studentCopyBoxX + studentCopyPad, sealY);
+  doc.line(studentCopyBoxX + 90, sealY + 7, studentCopyBoxX + studentCopyBoxW - 10, sealY + 7);
+
+  y = studentCopyBoxY + studentCopyBoxH + 8;
 
   doc.setFont("times", "italic");
   doc.setFontSize(10);
