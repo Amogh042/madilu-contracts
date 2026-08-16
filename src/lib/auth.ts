@@ -20,10 +20,13 @@ export function getManagerSession(): ManagerSession | null {
 }
 
 export function setManagerSession(manager: DbManager) {
-  const pgNames = manager.pg_name.split(",").map(s => s.trim()).filter(Boolean);
+  const pgNames = manager.pg_name
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
   sessionStorage.setItem(
     MANAGER_SESSION_KEY,
-    JSON.stringify({ id: manager.id, name: manager.name, phone: manager.phone, pgNames })
+    JSON.stringify({ id: manager.id, name: manager.name, phone: manager.phone, pgNames }),
   );
 }
 
@@ -42,6 +45,8 @@ export async function ownerSignOut() {
 }
 
 export async function getOwnerSession() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   return session;
 }

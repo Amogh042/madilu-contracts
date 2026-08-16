@@ -97,13 +97,17 @@ export function rowToAgreementData(r: DbAgreement): AgreementData {
         instalments = snap.instalments;
       } else {
         const legacy: Instalment[] = [];
-        if (snap.annualAmount1) legacy.push({ amount: snap.annualAmount1, dueDate: snap.annualDate1 || "" });
-        if (snap.annualAmount2) legacy.push({ amount: snap.annualAmount2, dueDate: snap.annualDate2 || "" });
+        if (snap.annualAmount1)
+          legacy.push({ amount: snap.annualAmount1, dueDate: snap.annualDate1 || "" });
+        if (snap.annualAmount2)
+          legacy.push({ amount: snap.annualAmount2, dueDate: snap.annualDate2 || "" });
         if (legacy.length) instalments = legacy;
       }
       if (snap.createdByManagerName) createdByManagerName = snap.createdByManagerName;
       if (snap.totalAmount) totalAmount = snap.totalAmount;
-    } catch {}
+    } catch {
+      // Ignore snapshot parsing issues for older/legacy agreement records.
+    }
   }
 
   const paymentMode: AgreementData["paymentMode"] =
@@ -126,7 +130,7 @@ export function rowToAgreementData(r: DbAgreement): AgreementData {
       guardianEmail: r.guardian_email || "",
       guardianAge: r.parent_age || "",
       guardianRelation: "",
-      aadhaarNumber: (r as Record<string, unknown>).resident_aadhaar as string || "",
+      aadhaarNumber: ((r as Record<string, unknown>).resident_aadhaar as string) || "",
       paymentMode: r.payment_mode || "",
       declaration: "",
       timestamp: r.created_at,
@@ -140,7 +144,7 @@ export function rowToAgreementData(r: DbAgreement): AgreementData {
     residentAge: r.resident_age || "",
     residentCollege: r.resident_college || "",
     residentStudentId: r.resident_student_id || "",
-    residentAadhaar: (r as Record<string, unknown>).resident_aadhaar as string || "",
+    residentAadhaar: ((r as Record<string, unknown>).resident_aadhaar as string) || "",
     parentFatherName: r.parent_father_name || "",
     parentAge: r.parent_age || "",
     pgName: r.pg_name,
@@ -158,19 +162,27 @@ export function rowToAgreementData(r: DbAgreement): AgreementData {
   };
 }
 
-export async function createAgreement(d: AgreementData, managerId: string | null, status: "pending" | "approved" = "pending") {
+export async function createAgreement(
+  d: AgreementData,
+  managerId: string | null,
+  status: "pending" | "approved" = "pending",
+) {
   const row = agreementDataToRow(d, managerId);
   const insertPayload = { ...row, status };
   console.log("[createAgreement] manager_id:", managerId, "status:", status);
   console.log("[createAgreement] payload:", JSON.stringify(insertPayload, null, 2));
-  const { data, error } = await supabase
-    .from("agreements")
-    .insert(insertPayload)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("agreements").insert(insertPayload).select().single();
   if (error) {
-    console.error("[createAgreement] Supabase error:", error.message, error.details, error.hint, error.code);
-    throw new Error(`Supabase insert failed: ${error.message}${error.details ? " — " + error.details : ""}${error.hint ? " (hint: " + error.hint + ")" : ""}`);
+    console.error(
+      "[createAgreement] Supabase error:",
+      error.message,
+      error.details,
+      error.hint,
+      error.code,
+    );
+    throw new Error(
+      `Supabase insert failed: ${error.message}${error.details ? " — " + error.details : ""}${error.hint ? " (hint: " + error.hint + ")" : ""}`,
+    );
   }
   console.log("[createAgreement] success, id:", data?.id);
   return data as DbAgreement;
@@ -189,7 +201,11 @@ export async function updateAgreement(id: string, d: AgreementData) {
   return data as DbAgreement;
 }
 
-export async function fetchAgreements(filters?: { pg_name?: string; manager_id?: string; status?: string }) {
+export async function fetchAgreements(filters?: {
+  pg_name?: string;
+  manager_id?: string;
+  status?: string;
+}) {
   let q = supabase.from("agreements").select("*").order("created_at", { ascending: false });
   if (filters?.pg_name) q = q.eq("pg_name", filters.pg_name);
   if (filters?.manager_id) q = q.eq("manager_id", filters.manager_id);

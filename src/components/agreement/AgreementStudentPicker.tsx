@@ -11,11 +11,17 @@ type Props = {
 
 const fmtDate = (iso: string) => {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 };
 
-const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
-const selectCls = "input-glow w-full bg-[#111114]/90 border border-[#D4A853]/30 rounded-xl px-4 py-2.5 text-sm text-[#F5D799] placeholder:text-white/30 transition-all hover:border-[#D4A853]/50 focus:border-[#D4A853]/70 focus:outline-none focus:ring-2 focus:ring-[#D4A853]/20";
+const inputCls =
+  "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
+const selectCls =
+  "input-glow w-full bg-[#111114]/90 border border-[#D4A853]/30 rounded-xl px-4 py-2.5 text-sm text-[#F5D799] placeholder:text-white/30 transition-all hover:border-[#D4A853]/50 focus:border-[#D4A853]/70 focus:outline-none focus:ring-2 focus:ring-[#D4A853]/20";
 
 const emptyManual = {
   student_name: "",
@@ -64,11 +70,12 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
   }, [managerId]);
 
   const filtered = search.trim()
-    ? agreements.filter(a =>
-        a.student_name.toLowerCase().includes(search.toLowerCase()) ||
-        (a.student_phone || "").toLowerCase().includes(search.toLowerCase()) ||
-        a.pg_name.toLowerCase().includes(search.toLowerCase()) ||
-        (a.room_number || "").toLowerCase().includes(search.toLowerCase())
+    ? agreements.filter(
+        (a) =>
+          a.student_name.toLowerCase().includes(search.toLowerCase()) ||
+          (a.student_phone || "").toLowerCase().includes(search.toLowerCase()) ||
+          a.pg_name.toLowerCase().includes(search.toLowerCase()) ||
+          (a.room_number || "").toLowerCase().includes(search.toLowerCase()),
       )
     : agreements;
 
@@ -123,29 +130,99 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
           <p className="text-white/50 text-sm mt-1">Enter student details manually</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-3 mb-4">
-          <input className={inputCls} placeholder="Student Name *" value={form.student_name} onChange={e => setForm({ ...form, student_name: e.target.value })} />
-          <input className={inputCls} placeholder="Phone" value={form.student_phone} onChange={e => setForm({ ...form, student_phone: e.target.value })} />
-          <input className={inputCls} placeholder="Email" value={form.student_email} onChange={e => setForm({ ...form, student_email: e.target.value })} />
-          <input className={inputCls} placeholder="Age" value={form.resident_age} onChange={e => setForm({ ...form, resident_age: e.target.value })} />
-          <input className={inputCls} placeholder="Guardian Name" value={form.guardian_name} onChange={e => setForm({ ...form, guardian_name: e.target.value })} />
-          <input className={inputCls} placeholder="Guardian Phone" value={form.guardian_phone} onChange={e => setForm({ ...form, guardian_phone: e.target.value })} />
-          <select className={selectCls} value={form.pg_name} onChange={e => setForm({ ...form, pg_name: e.target.value })}>
-            {PG_LIST.map(p => <option key={p} value={p} className="bg-[#111114] text-[#F5D799]">{p}</option>)}
+          <input
+            className={inputCls}
+            placeholder="Student Name *"
+            value={form.student_name}
+            onChange={(e) => setForm({ ...form, student_name: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Phone"
+            value={form.student_phone}
+            onChange={(e) => setForm({ ...form, student_phone: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Email"
+            value={form.student_email}
+            onChange={(e) => setForm({ ...form, student_email: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Age"
+            value={form.resident_age}
+            onChange={(e) => setForm({ ...form, resident_age: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Guardian Name"
+            value={form.guardian_name}
+            onChange={(e) => setForm({ ...form, guardian_name: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Guardian Phone"
+            value={form.guardian_phone}
+            onChange={(e) => setForm({ ...form, guardian_phone: e.target.value })}
+          />
+          <select
+            className={selectCls}
+            value={form.pg_name}
+            onChange={(e) => setForm({ ...form, pg_name: e.target.value })}
+          >
+            {PG_LIST.map((p) => (
+              <option key={p} value={p} className="bg-[#111114] text-[#F5D799]">
+                {p}
+              </option>
+            ))}
           </select>
-          <input className={inputCls} placeholder="Room Number" value={form.room_number} onChange={e => setForm({ ...form, room_number: e.target.value })} />
-          <input className={inputCls} placeholder="Monthly Rent" type="number" value={form.monthly_rent || ""} onChange={e => setForm({ ...form, monthly_rent: Number(e.target.value) })} />
-          <input className={inputCls} placeholder="Security Deposit" type="number" value={form.security_deposit || ""} onChange={e => setForm({ ...form, security_deposit: Number(e.target.value) })} />
+          <input
+            className={inputCls}
+            placeholder="Room Number"
+            value={form.room_number}
+            onChange={(e) => setForm({ ...form, room_number: e.target.value })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Monthly Rent"
+            type="number"
+            value={form.monthly_rent || ""}
+            onChange={(e) => setForm({ ...form, monthly_rent: Number(e.target.value) })}
+          />
+          <input
+            className={inputCls}
+            placeholder="Security Deposit"
+            type="number"
+            value={form.security_deposit || ""}
+            onChange={(e) => setForm({ ...form, security_deposit: Number(e.target.value) })}
+          />
           <div>
             <label className="text-xs text-white/40 mb-1 block">Start Date</label>
-            <input className={inputCls} type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} />
+            <input
+              className={inputCls}
+              type="date"
+              value={form.start_date}
+              onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+            />
           </div>
           <div>
             <label className="text-xs text-white/40 mb-1 block">End Date</label>
-            <input className={inputCls} type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} />
+            <input
+              className={inputCls}
+              type="date"
+              value={form.end_date}
+              onChange={(e) => setForm({ ...form, end_date: e.target.value })}
+            />
           </div>
         </div>
         <div className="flex gap-3 mt-6">
-          <button onClick={() => setManual(false)} className="glass glass-hover rounded-xl px-6 py-3 text-sm">← Back to List</button>
+          <button
+            onClick={() => setManual(false)}
+            className="glass glass-hover rounded-xl px-6 py-3 text-sm"
+          >
+            ← Back to List
+          </button>
           <button
             onClick={handleManualSubmit}
             disabled={!form.student_name.trim()}
@@ -162,19 +239,23 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
     <div className="glass rounded-3xl p-8 animate-fade-in">
       <div className="mb-6">
         <h2 className="font-display text-3xl font-bold">{title}</h2>
-        <p className="text-white/50 text-sm mt-1">Select a student from existing approved agreements</p>
+        <p className="text-white/50 text-sm mt-1">
+          Select a student from existing approved agreements
+        </p>
       </div>
 
       <input
         className={inputCls + " mb-5"}
         placeholder="Search by name, phone, PG, or room..."
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
       {loading ? (
         <div className="space-y-2">
-          {[1, 2, 3].map(i => <div key={i} className="glass rounded-xl p-4 h-20 animate-pulse" />)}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="glass rounded-xl p-4 h-20 animate-pulse" />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-10 text-white/40 text-sm">
@@ -182,7 +263,7 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-1">
-          {filtered.map(a => (
+          {filtered.map((a) => (
             <button
               key={a.id}
               onClick={() => onSelect(a)}
@@ -191,7 +272,11 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
               <p className="font-medium truncate">{a.student_name}</p>
               <p className="text-xs text-white/50 mt-1">
                 <span className="text-[#F5D799]">{a.pg_name}</span>
-                {a.room_number && <><span className="mx-1 text-white/20">·</span>Room {a.room_number}</>}
+                {a.room_number && (
+                  <>
+                    <span className="mx-1 text-white/20">·</span>Room {a.room_number}
+                  </>
+                )}
               </p>
               <p className="text-xs text-white/40 mt-0.5 font-mono">
                 {fmtDate(a.start_date)} → {fmtDate(a.end_date)}
@@ -202,8 +287,13 @@ export function AgreementStudentPicker({ managerId, onSelect, onBack, title }: P
       )}
 
       <div className="flex justify-between mt-6">
-        <button onClick={onBack} className="glass glass-hover rounded-xl px-6 py-3 text-sm">← Back</button>
-        <button onClick={() => setManual(true)} className="glass glass-hover rounded-xl px-6 py-3 text-sm border border-[#D4A853]/30 text-[#F5D799]">
+        <button onClick={onBack} className="glass glass-hover rounded-xl px-6 py-3 text-sm">
+          ← Back
+        </button>
+        <button
+          onClick={() => setManual(true)}
+          className="glass glass-hover rounded-xl px-6 py-3 text-sm border border-[#D4A853]/30 text-[#F5D799]"
+        >
           Enter Details Manually
         </button>
       </div>

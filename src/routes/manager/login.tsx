@@ -2,16 +2,28 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Background } from "@/components/agreement/Background";
-import { lookupManagerByPhone, setManagerPassword, verifyManagerPassword, getManagerByPhone, type ManagerLookup } from "@/lib/managers-db";
+import {
+  lookupManagerByPhone,
+  setManagerPassword,
+  verifyManagerPassword,
+  getManagerByPhone,
+  type ManagerLookup,
+} from "@/lib/managers-db";
 import { setManagerSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/manager/login")({
   component: ManagerLogin,
 });
 
-const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 transition-all";
+const inputCls =
+  "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-white/30 transition-all";
 
-function PasswordInput({ value, onChange, onKeyDown, placeholder }: {
+function PasswordInput({
+  value,
+  onChange,
+  onKeyDown,
+  placeholder,
+}: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
@@ -77,16 +89,28 @@ function ManagerLogin() {
   };
 
   const handleSetPassword = async () => {
-    if (password.length < 6) { setError("Password must be at least 6 characters"); return; }
-    if (password !== confirmPw) { setError("Passwords do not match"); return; }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirmPw) {
+      setError("Passwords do not match");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
       const ok = await setManagerPassword(phone.trim(), password);
       console.log("[handleSetPassword] result:", ok);
-      if (!ok) { setError("Failed to set password"); return; }
+      if (!ok) {
+        setError("Failed to set password");
+        return;
+      }
       const manager = await getManagerByPhone(phone.trim());
-      if (!manager) { setError("Manager not found"); return; }
+      if (!manager) {
+        setError("Manager not found");
+        return;
+      }
       setManagerSession(manager);
       navigate({ to: "/manager/dashboard" });
     } catch (e: unknown) {
@@ -105,9 +129,17 @@ function ManagerLogin() {
     try {
       const ok = await verifyManagerPassword(phone.trim(), password);
       console.log("[handleLogin] verify result:", ok);
-      if (!ok) { setError("Incorrect password"); setLoading(false); return; }
+      if (!ok) {
+        setError("Incorrect password");
+        setLoading(false);
+        return;
+      }
       const manager = await getManagerByPhone(phone.trim());
-      if (!manager) { setError("Manager account not found or deactivated"); setLoading(false); return; }
+      if (!manager) {
+        setError("Manager account not found or deactivated");
+        setLoading(false);
+        return;
+      }
       setManagerSession(manager);
       navigate({ to: "/manager/dashboard" });
     } catch (e: unknown) {
@@ -121,37 +153,58 @@ function ManagerLogin() {
     <div className="relative min-h-screen flex items-center justify-center">
       <Background />
       <div className="relative z-10 w-full max-w-md mx-auto px-6">
-        <button onClick={() => navigate({ to: "/" })} className="glass glass-hover rounded-xl px-4 py-2 text-sm mb-8 inline-block">
+        <button
+          onClick={() => navigate({ to: "/" })}
+          className="glass glass-hover rounded-xl px-4 py-2 text-sm mb-8 inline-block"
+        >
           ← Back
         </button>
 
         <div className="glass rounded-3xl p-8 animate-fade-in">
           <div className="w-14 h-14 rounded-2xl bg-[#4ECDC4]/15 flex items-center justify-center mb-5">
-            <svg className="w-7 h-7 text-[#4ECDC4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            <svg
+              className="w-7 h-7 text-[#4ECDC4]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+              />
             </svg>
           </div>
           <h2 className="font-display text-3xl font-bold mb-1">Manager Login</h2>
           <p className="text-white/50 text-sm mb-6">Sign in with your registered phone number.</p>
 
           {error && (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 p-3 text-sm mb-4">{error}</div>
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 p-3 text-sm mb-4">
+              {error}
+            </div>
           )}
 
           {stage === "phone" && (
             <div className="space-y-4">
               <label className="block">
-                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Phone Number</span>
+                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">
+                  Phone Number
+                </span>
                 <input
                   className={inputCls + " mt-1.5"}
                   value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handlePhoneSubmit()}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handlePhoneSubmit()}
                   placeholder="10-digit phone number"
                   type="tel"
                 />
               </label>
-              <button onClick={handlePhoneSubmit} disabled={loading || !phone.trim()} className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40">
+              <button
+                onClick={handlePhoneSubmit}
+                disabled={loading || !phone.trim()}
+                className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40"
+              >
                 {loading ? "Checking..." : "Continue"}
               </button>
             </div>
@@ -161,14 +214,31 @@ function ManagerLogin() {
             <div className="space-y-4">
               <p className="text-[#4ECDC4] text-sm">First time login — set your password.</p>
               <label className="block">
-                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">New Password</span>
-                <PasswordInput value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" />
+                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">
+                  New Password
+                </span>
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min 6 characters"
+                />
               </label>
               <label className="block">
-                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Confirm Password</span>
-                <PasswordInput value={confirmPw} onChange={e => setConfirmPw(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSetPassword()} placeholder="Repeat password" />
+                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">
+                  Confirm Password
+                </span>
+                <PasswordInput
+                  value={confirmPw}
+                  onChange={(e) => setConfirmPw(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSetPassword()}
+                  placeholder="Repeat password"
+                />
               </label>
-              <button onClick={handleSetPassword} disabled={loading} className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40">
+              <button
+                onClick={handleSetPassword}
+                disabled={loading}
+                className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40"
+              >
                 {loading ? "Setting..." : "Set Password & Login"}
               </button>
             </div>
@@ -176,15 +246,35 @@ function ManagerLogin() {
 
           {stage === "enter_password" && (
             <div className="space-y-4">
-              <p className="text-white/50 text-sm">Phone: <span className="text-white font-mono">{phone}</span></p>
+              <p className="text-white/50 text-sm">
+                Phone: <span className="text-white font-mono">{phone}</span>
+              </p>
               <label className="block">
-                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">Password</span>
-                <PasswordInput value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="Enter your password" />
+                <span className="text-xs uppercase tracking-wider text-white/50 font-medium">
+                  Password
+                </span>
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  placeholder="Enter your password"
+                />
               </label>
-              <button onClick={handleLogin} disabled={loading || !password} className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40">
+              <button
+                onClick={handleLogin}
+                disabled={loading || !password}
+                className="btn-gold rounded-xl px-6 py-3 text-sm w-full disabled:opacity-40"
+              >
                 {loading ? "Signing in..." : "Sign In"}
               </button>
-              <button onClick={() => { setStage("phone"); setPassword(""); setError(""); }} className="text-xs text-white/40 hover:text-white/60 w-full text-center">
+              <button
+                onClick={() => {
+                  setStage("phone");
+                  setPassword("");
+                  setError("");
+                }}
+                className="text-xs text-white/40 hover:text-white/60 w-full text-center"
+              >
                 Use a different number
               </button>
             </div>

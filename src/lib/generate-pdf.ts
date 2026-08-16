@@ -50,7 +50,7 @@ export function generateAgreementPDF(d: AgreementData) {
   };
 
   const renderSegmented = (segments: TextSegment[], maxW: number, leftOffset = 0) => {
-    const fullText = segments.map(s => s.text).join("");
+    const fullText = segments.map((s) => s.text).join("");
     const boldMap: boolean[] = [];
     for (const seg of segments) {
       for (let c = 0; c < seg.text.length; c++) boldMap.push(!!seg.bold);
@@ -248,8 +248,12 @@ export function generateAgreementPDF(d: AgreementData) {
           doc.setFontSize(FONT_SIZE);
           doc.setFont("times", "normal");
 
-          const witness1Lines = sec.columns[0].split("\n").filter(l => !l.includes("[Signature Box]"));
-          const witness2Lines = sec.columns[1].split("\n").filter(l => !l.includes("[Signature Box]"));
+          const witness1Lines = sec.columns[0]
+            .split("\n")
+            .filter((l) => !l.includes("[Signature Box]"));
+          const witness2Lines = sec.columns[1]
+            .split("\n")
+            .filter((l) => !l.includes("[Signature Box]"));
 
           const startY = y;
           for (const line of witness1Lines) {

@@ -12,10 +12,7 @@ export type DbNotification = {
 };
 
 export async function fetchNotifications(userType: "manager" | "owner", userId?: string) {
-  let q = supabase
-    .from("notifications")
-    .select("*")
-    .eq("user_type", userType);
+  let q = supabase.from("notifications").select("*").eq("user_type", userType);
   if (userType === "manager" && userId) q = q.eq("user_id", userId);
   const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
   if (error) throw error;
@@ -23,10 +20,7 @@ export async function fetchNotifications(userType: "manager" | "owner", userId?:
 }
 
 export async function markNotificationRead(id: string) {
-  const { error } = await supabase
-    .from("notifications")
-    .update({ is_read: true })
-    .eq("id", id);
+  const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
   if (error) throw error;
 }
 
@@ -41,7 +35,10 @@ export async function markAllNotificationsRead(userType: "manager" | "owner", us
   if (error) throw error;
 }
 
-export async function getUnreadCount(userType: "manager" | "owner", userId: string): Promise<number> {
+export async function getUnreadCount(
+  userType: "manager" | "owner",
+  userId: string,
+): Promise<number> {
   const { count, error } = await supabase
     .from("notifications")
     .select("*", { count: "exact", head: true })
@@ -52,7 +49,13 @@ export async function getUnreadCount(userType: "manager" | "owner", userId: stri
   return count || 0;
 }
 
-export async function createNotification(n: { user_type: "manager" | "owner"; user_id: string; title: string; message: string; agreement_id?: string }) {
+export async function createNotification(n: {
+  user_type: "manager" | "owner";
+  user_id: string;
+  title: string;
+  message: string;
+  agreement_id?: string;
+}) {
   const { error } = await supabase.from("notifications").insert(n);
   if (error) throw error;
 }

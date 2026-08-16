@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { PG_ADDRESSES, PG_LIST, OWNER_LIST, type AgreementData, type Instalment } from "@/lib/pg-data";
 import {
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  PG_ADDRESSES,
+  PG_LIST,
+  OWNER_LIST,
+  type AgreementData,
+  type Instalment,
+} from "@/lib/pg-data";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -24,8 +34,10 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </label>
 );
 
-const inputCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
-const triggerCls = "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-all hover:border-[#D4A853]/40 data-[state=open]:border-[#D4A853]/60 data-[placeholder]:text-white/40";
+const inputCls =
+  "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm placeholder:text-white/30 transition-all";
+const triggerCls =
+  "input-glow w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-all hover:border-[#D4A853]/40 data-[state=open]:border-[#D4A853]/60 data-[placeholder]:text-white/40";
 
 const parseDateLocal = (v: string): Date | undefined => {
   if (!v) return undefined;
@@ -111,7 +123,8 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
     }
   }, [data.monthlyRent, data.startDate, data.endDate, totalManual]);
 
-  const update = <K extends keyof AgreementData>(k: K, v: AgreementData[K]) => setData({ ...data, [k]: v });
+  const update = <K extends keyof AgreementData>(k: K, v: AgreementData[K]) =>
+    setData({ ...data, [k]: v });
 
   const isMonthly = data.paymentMode === "Monthly";
   const instalmentCount = data.instalments?.length || 0;
@@ -145,53 +158,150 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
           <h3 className="font-display text-xl text-gold">Owner (First Party)</h3>
           <Field label="Proprietor Name">
             <Select
-              value={OWNER_LIST.some(o => o.name === data.ownerName) ? data.ownerName : data.ownerName ? "__other__" : undefined}
+              value={
+                OWNER_LIST.some((o) => o.name === data.ownerName)
+                  ? data.ownerName
+                  : data.ownerName
+                    ? "__other__"
+                    : undefined
+              }
               onValueChange={(v) => {
                 if (v === "__other__") {
-                  setData({ ...data, ownerName: "", ownerFatherName: "", ownerContact: "", ownerAge: "", ownerAddress: "" });
+                  setData({
+                    ...data,
+                    ownerName: "",
+                    ownerFatherName: "",
+                    ownerContact: "",
+                    ownerAge: "",
+                    ownerAddress: "",
+                  });
                 } else {
-                  const owner = OWNER_LIST.find(o => o.name === v);
+                  const owner = OWNER_LIST.find((o) => o.name === v);
                   if (owner) {
-                    setData({ ...data, ownerName: owner.name, ownerFatherName: owner.fatherName, ownerContact: owner.contact, ownerAge: owner.age, ownerAddress: data.pgAddress });
+                    setData({
+                      ...data,
+                      ownerName: owner.name,
+                      ownerFatherName: owner.fatherName,
+                      ownerContact: owner.contact,
+                      ownerAge: owner.age,
+                      ownerAddress: data.pgAddress,
+                    });
                   }
                 }
               }}
             >
-              <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+              <SelectTrigger
+                className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}
+              >
                 <SelectValue placeholder="Select Owner…" />
               </SelectTrigger>
               <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl">
-                {OWNER_LIST.map(o => (
-                  <SelectItem key={o.name} value={o.name} className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">
+                {OWNER_LIST.map((o) => (
+                  <SelectItem
+                    key={o.name}
+                    value={o.name}
+                    className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]"
+                  >
                     {o.name}
                   </SelectItem>
                 ))}
-                <SelectItem value="__other__" className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799] text-white/50">
+                <SelectItem
+                  value="__other__"
+                  className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799] text-white/50"
+                >
                   Other (enter manually)
                 </SelectItem>
               </SelectContent>
             </Select>
-            {data.ownerName && !OWNER_LIST.some(o => o.name === data.ownerName) && (
-              <input className={inputCls + " mt-2"} value={data.ownerName} onChange={e => update("ownerName", e.target.value)} placeholder="Enter owner name" />
+            {data.ownerName && !OWNER_LIST.some((o) => o.name === data.ownerName) && (
+              <input
+                className={inputCls + " mt-2"}
+                value={data.ownerName}
+                onChange={(e) => update("ownerName", e.target.value)}
+                placeholder="Enter owner name"
+              />
             )}
           </Field>
-          <Field label="S/o (Father's Name)"><input className={inputCls} value={data.ownerFatherName} onChange={e => update("ownerFatherName", e.target.value)} placeholder="Father's name" /></Field>
+          <Field label="S/o (Father's Name)">
+            <input
+              className={inputCls}
+              value={data.ownerFatherName}
+              onChange={(e) => update("ownerFatherName", e.target.value)}
+              placeholder="Father's name"
+            />
+          </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Age"><input className={inputCls} value={data.ownerAge} onChange={e => update("ownerAge", e.target.value)} placeholder="Age" /></Field>
-            <Field label="Contact"><input className={inputCls} value={data.ownerContact} onChange={e => update("ownerContact", e.target.value)} placeholder="Phone" /></Field>
+            <Field label="Age">
+              <input
+                className={inputCls}
+                value={data.ownerAge}
+                onChange={(e) => update("ownerAge", e.target.value)}
+                placeholder="Age"
+              />
+            </Field>
+            <Field label="Contact">
+              <input
+                className={inputCls}
+                value={data.ownerContact}
+                onChange={(e) => update("ownerContact", e.target.value)}
+                placeholder="Phone"
+              />
+            </Field>
           </div>
 
           <h3 className="font-display text-xl text-gold pt-3">Resident (Second Party)</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Resident Age"><input className={inputCls} value={data.residentAge} onChange={e => update("residentAge", e.target.value)} placeholder="Age" /></Field>
-            <Field label="ID"><input className={inputCls} value={data.residentStudentId} onChange={e => update("residentStudentId", e.target.value)} placeholder="ID number" /></Field>
+            <Field label="Resident Age">
+              <input
+                className={inputCls}
+                value={data.residentAge}
+                onChange={(e) => update("residentAge", e.target.value)}
+                placeholder="Age"
+              />
+            </Field>
+            <Field label="ID">
+              <input
+                className={inputCls}
+                value={data.residentStudentId}
+                onChange={(e) => update("residentStudentId", e.target.value)}
+                placeholder="ID number"
+              />
+            </Field>
           </div>
-          <Field label="College Name / Working At"><input className={inputCls} value={data.residentCollege} onChange={e => update("residentCollege", e.target.value)} placeholder="College / Workplace" /></Field>
-          <Field label="Aadhaar Number"><input className={inputCls} value={data.residentAadhaar} onChange={e => update("residentAadhaar", e.target.value)} placeholder="Aadhaar number" /></Field>
+          <Field label="College Name / Working At">
+            <input
+              className={inputCls}
+              value={data.residentCollege}
+              onChange={(e) => update("residentCollege", e.target.value)}
+              placeholder="College / Workplace"
+            />
+          </Field>
+          <Field label="Aadhaar Number">
+            <input
+              className={inputCls}
+              value={data.residentAadhaar}
+              onChange={(e) => update("residentAadhaar", e.target.value)}
+              placeholder="Aadhaar number"
+            />
+          </Field>
 
           <h3 className="font-display text-xl text-gold pt-3">Parent / Guarantor (Third Party)</h3>
-          <Field label="S/o / D/o (Father's Name)"><input className={inputCls} value={data.parentFatherName} onChange={e => update("parentFatherName", e.target.value)} placeholder="Father's name" /></Field>
-          <Field label="Parent Age"><input className={inputCls} value={data.parentAge} onChange={e => update("parentAge", e.target.value)} placeholder="Age" /></Field>
+          <Field label="S/o / D/o (Father's Name)">
+            <input
+              className={inputCls}
+              value={data.parentFatherName}
+              onChange={(e) => update("parentFatherName", e.target.value)}
+              placeholder="Father's name"
+            />
+          </Field>
+          <Field label="Parent Age">
+            <input
+              className={inputCls}
+              value={data.parentAge}
+              onChange={(e) => update("parentAge", e.target.value)}
+              placeholder="Age"
+            />
+          </Field>
         </div>
 
         {/* Right column — PG & Payment */}
@@ -204,15 +314,22 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
             ) : (
               <Select
                 value={data.pgName || undefined}
-                onValueChange={(pg) => setData({ ...data, pgName: pg, pgAddress: PG_ADDRESSES[pg] || "", ownerAddress: PG_ADDRESSES[pg] || "" })}
+                onValueChange={(pg) =>
+                  setData({
+                    ...data,
+                    pgName: pg,
+                    pgAddress: PG_ADDRESSES[pg] || "",
+                    ownerAddress: PG_ADDRESSES[pg] || "",
+                  })
+                }
               >
-                <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                <SelectTrigger
+                  className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}
+                >
                   <SelectValue placeholder="Select PG…" />
                 </SelectTrigger>
-                <SelectContent
-                  className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl"
-                >
-                  {pgOptions.map(p => (
+                <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl">
+                  {pgOptions.map((p) => (
                     <SelectItem
                       key={p}
                       value={p}
@@ -226,29 +343,62 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
             )}
           </Field>
 
-          <Field label="PG Address"><input className={inputCls} value={data.pgAddress} onChange={e => update("pgAddress", e.target.value)} placeholder="Full address" /></Field>
-          <Field label="Room Number"><input className={inputCls} value={data.roomNumber} onChange={e => update("roomNumber", e.target.value)} placeholder="Room no." /></Field>
+          <Field label="PG Address">
+            <input
+              className={inputCls}
+              value={data.pgAddress}
+              onChange={(e) => update("pgAddress", e.target.value)}
+              placeholder="Full address"
+            />
+          </Field>
+          <Field label="Room Number">
+            <input
+              className={inputCls}
+              value={data.roomNumber}
+              onChange={(e) => update("roomNumber", e.target.value)}
+              placeholder="Room no."
+            />
+          </Field>
 
           <Field label="Monthly Rent (₹)">
-            <input type="number" step="1" className={inputCls + " font-mono"} value={data.monthlyRent || ""}
-              onChange={e => {
+            <input
+              type="number"
+              step="1"
+              className={inputCls + " font-mono"}
+              value={data.monthlyRent || ""}
+              onChange={(e) => {
                 const rent = Math.round(Number(e.target.value));
                 setData({ ...data, monthlyRent: rent, securityDeposit: rent * 3 });
-              }} placeholder="0" />
+              }}
+              placeholder="0"
+            />
           </Field>
 
           {/* Payment Mode */}
           <Field label="Payment Mode">
             <div className="grid grid-cols-2 gap-2">
-              {(["Monthly", "Instalments"] as const).map(m => (
-                <label key={m} className={`flex items-center gap-3 cursor-pointer rounded-xl border px-4 py-2.5 text-sm transition-all ${data.paymentMode === m ? "border-[#D4A853] bg-[#D4A853]/10" : "border-white/10 hover:border-white/20"}`}>
-                  <input type="radio" className="accent-[#D4A853]" checked={data.paymentMode === m} onChange={() => {
-                    setData({
-                      ...data,
-                      paymentMode: m,
-                      instalments: m === "Instalments" ? (data.instalments?.length ? data.instalments : []) : undefined,
-                    });
-                  }} />
+              {(["Monthly", "Instalments"] as const).map((m) => (
+                <label
+                  key={m}
+                  className={`flex items-center gap-3 cursor-pointer rounded-xl border px-4 py-2.5 text-sm transition-all ${data.paymentMode === m ? "border-[#D4A853] bg-[#D4A853]/10" : "border-white/10 hover:border-white/20"}`}
+                >
+                  <input
+                    type="radio"
+                    className="accent-[#D4A853]"
+                    checked={data.paymentMode === m}
+                    onChange={() => {
+                      setData({
+                        ...data,
+                        paymentMode: m,
+                        instalments:
+                          m === "Instalments"
+                            ? data.instalments?.length
+                              ? data.instalments
+                              : []
+                            : undefined,
+                      });
+                    }}
+                  />
                   {m}
                 </label>
               ))}
@@ -262,12 +412,18 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
                   value={instalmentCount > 0 ? String(instalmentCount) : undefined}
                   onValueChange={(v) => setInstalmentCount(Number(v))}
                 >
-                  <SelectTrigger className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}>
+                  <SelectTrigger
+                    className={triggerCls + " h-auto [&>svg]:text-[#D4A853] [&>svg]:opacity-100"}
+                  >
                     <SelectValue placeholder="Select count…" />
                   </SelectTrigger>
                   <SelectContent className="border-white/10 bg-[#15151b]/95 backdrop-blur-2xl text-white shadow-2xl rounded-2xl max-h-[300px]">
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
-                      <SelectItem key={n} value={String(n)} className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]">
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                      <SelectItem
+                        key={n}
+                        value={String(n)}
+                        className="rounded-lg my-0.5 focus:bg-[#D4A853]/15 focus:text-[#F5D799] data-[state=checked]:text-[#F5D799]"
+                      >
                         {n}
                       </SelectItem>
                     ))}
@@ -278,11 +434,21 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
               {data.instalments?.map((inst, idx) => (
                 <div key={idx} className="grid grid-cols-2 gap-3">
                   <Field label={`Instalment ${idx + 1} Amount (₹)`}>
-                    <input type="number" className={inputCls + " font-mono"} value={inst.amount || ""}
-                      onChange={e => updateInstalment(idx, "amount", Math.round(Number(e.target.value)))} placeholder="0" />
+                    <input
+                      type="number"
+                      className={inputCls + " font-mono"}
+                      value={inst.amount || ""}
+                      onChange={(e) =>
+                        updateInstalment(idx, "amount", Math.round(Number(e.target.value)))
+                      }
+                      placeholder="0"
+                    />
                   </Field>
                   <Field label="Due Date">
-                    <DateField value={inst.dueDate} onChange={(v) => updateInstalment(idx, "dueDate", v)} />
+                    <DateField
+                      value={inst.dueDate}
+                      onChange={(v) => updateInstalment(idx, "dueDate", v)}
+                    />
                   </Field>
                 </div>
               ))}
@@ -290,18 +456,44 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Start Date"><DateField value={data.startDate} onChange={(v) => update("startDate", v)} /></Field>
-            <Field label="End Date"><DateField value={data.endDate} onChange={(v) => update("endDate", v)} /></Field>
+            <Field label="Start Date">
+              <DateField value={data.startDate} onChange={(v) => update("startDate", v)} />
+            </Field>
+            <Field label="End Date">
+              <DateField value={data.endDate} onChange={(v) => update("endDate", v)} />
+            </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Security Deposit (₹)"><input type="number" step="1" className={inputCls + " font-mono"} value={data.securityDeposit || ""} onChange={e => update("securityDeposit", Math.round(Number(e.target.value)))} placeholder="0" /></Field>
-            <Field label="AMC / Maintenance (₹)"><input type="number" step="1" className={inputCls + " font-mono"} value={data.maintenanceCharges || ""} onChange={e => update("maintenanceCharges", Math.round(Number(e.target.value)))} placeholder="0" /></Field>
+            <Field label="Security Deposit (₹)">
+              <input
+                type="number"
+                step="1"
+                className={inputCls + " font-mono"}
+                value={data.securityDeposit || ""}
+                onChange={(e) => update("securityDeposit", Math.round(Number(e.target.value)))}
+                placeholder="0"
+              />
+            </Field>
+            <Field label="AMC / Maintenance (₹)">
+              <input
+                type="number"
+                step="1"
+                className={inputCls + " font-mono"}
+                value={data.maintenanceCharges || ""}
+                onChange={(e) => update("maintenanceCharges", Math.round(Number(e.target.value)))}
+                placeholder="0"
+              />
+            </Field>
           </div>
 
           <Field label="Total Amount (₹)">
-            <input type="number" step="1" className={inputCls + " font-mono"} value={data.totalAmount || ""}
-              onChange={e => {
+            <input
+              type="number"
+              step="1"
+              className={inputCls + " font-mono"}
+              value={data.totalAmount || ""}
+              onChange={(e) => {
                 const v = e.target.value;
                 if (v === "" || v === "0") {
                   setTotalManual(false);
@@ -310,15 +502,22 @@ export function DetailsStep({ data, setData, onBack, onNext, lockedPg, allowedPg
                   setTotalManual(true);
                   update("totalAmount", Math.round(Number(v)));
                 }
-              }} placeholder="Auto-calculated" />
+              }}
+              placeholder="Auto-calculated"
+            />
           </Field>
         </div>
       </div>
 
       <div className="flex justify-between mt-8">
-        <button onClick={onBack} className="glass glass-hover rounded-xl px-6 py-3 text-sm">← Back</button>
-        <button onClick={onNext} disabled={!data.pgName || !hasPaymentAmount || !data.startDate}
-          className="btn-gold rounded-xl px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+        <button onClick={onBack} className="glass glass-hover rounded-xl px-6 py-3 text-sm">
+          ← Back
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!data.pgName || !hasPaymentAmount || !data.startDate}
+          className="btn-gold rounded-xl px-6 py-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           Next →
         </button>
       </div>

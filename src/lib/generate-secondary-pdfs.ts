@@ -70,7 +70,9 @@ export function generateExtensionPDF(a: DbAgreement) {
     doc.setFontSize(11);
   };
 
-  const writeGap = (g = 2) => { y += g; };
+  const writeGap = (g = 2) => {
+    y += g;
+  };
 
   y = writeHeader(doc, y);
 
@@ -88,7 +90,9 @@ export function generateExtensionPDF(a: DbAgreement) {
   writeLine("BETWEEN", true);
   writeGap();
 
-  writeLine(`Mr. ${blank(a.owner_name)}, Proprietor of Madilu PG Accommodation, located at ${blank(a.pg_address)}, Kumaraswamy Layout, Bangalore - 560078.`);
+  writeLine(
+    `Mr. ${blank(a.owner_name)}, Proprietor of Madilu PG Accommodation, located at ${blank(a.pg_address)}, Kumaraswamy Layout, Bangalore - 560078.`,
+  );
   writeLine("Hereinafter called the 'PG Owner / First Party'.");
   writeGap();
 
@@ -104,38 +108,83 @@ export function generateExtensionPDF(a: DbAgreement) {
 
   writeLine("RECITALS", true);
   writeGap();
-  writeLine(`1. The Second Party was admitted to the PG on ${fmtDate(a.start_date)} under a rental agreement valid till ${fmtDate(a.end_date)}.`, false, 11, 3);
-  writeLine("2. The Second Party now wishes to extend their stay for a further period.", false, 11, 3);
+  writeLine(
+    `1. The Second Party was admitted to the PG on ${fmtDate(a.start_date)} under a rental agreement valid till ${fmtDate(a.end_date)}.`,
+    false,
+    11,
+    3,
+  );
+  writeLine(
+    "2. The Second Party now wishes to extend their stay for a further period.",
+    false,
+    11,
+    3,
+  );
   writeGap();
 
   writeLine("TERMS & CONDITIONS", true);
   writeGap();
 
   writeLine("1. Extended Period & Mandatory Tenure:", true, 11);
-  writeLine("The tenure is hereby extended from ____________ to ____________ for a mandatory period of 12 months.", false, 11, 3);
+  writeLine(
+    "The tenure is hereby extended from ____________ to ____________ for a mandatory period of 12 months.",
+    false,
+    11,
+    3,
+  );
   writeLine("Extension year shall be 20__.", false, 11, 3);
   writeLine("The Second Party agrees not to vacate before completion of 12 months.", false, 11, 3);
   writeGap();
 
   writeLine("2. Rent & Maintenance:", true, 11);
-  writeLine(`Total: Rs. ${inr(a.monthly_rent)}/- per month, payable on or before the 5th of every month.`, false, 11, 3);
+  writeLine(
+    `Total: Rs. ${inr(a.monthly_rent)}/- per month, payable on or before the 5th of every month.`,
+    false,
+    11,
+    3,
+  );
   writeGap();
 
   writeLine("3. Late Payment Penalty:", true, 11);
-  writeLine("If rent is not paid on or before the due date, a late fine of Rs. 1000/- shall be applicable for that month.", false, 11, 3);
+  writeLine(
+    "If rent is not paid on or before the due date, a late fine of Rs. 1000/- shall be applicable for that month.",
+    false,
+    11,
+    3,
+  );
   writeGap();
 
   writeLine("4. Security Deposit:", true, 11);
-  writeLine(`Previous deposit of Rs. ${inr(a.security_deposit)}/- will continue. No new deposit required.`, false, 11, 3);
+  writeLine(
+    `Previous deposit of Rs. ${inr(a.security_deposit)}/- will continue. No new deposit required.`,
+    false,
+    11,
+    3,
+  );
   writeGap();
 
   writeLine("5. Rules & Agreement:", true, 11);
-  writeLine(`All terms of original agreement dated ${fmtDate(a.start_date)} will continue to apply.`, false, 11, 3);
+  writeLine(
+    `All terms of original agreement dated ${fmtDate(a.start_date)} will continue to apply.`,
+    false,
+    11,
+    3,
+  );
   writeGap();
 
   writeLine("6. Breach:", true, 11);
-  writeLine("If dues are pending for 2 consecutive months, the PG Owner can terminate.", false, 11, 3);
-  writeLine("If the student vacates before completion of 12 months, security deposit will be forfeited.", false, 11, 3);
+  writeLine(
+    "If dues are pending for 2 consecutive months, the PG Owner can terminate.",
+    false,
+    11,
+    3,
+  );
+  writeLine(
+    "If the student vacates before completion of 12 months, security deposit will be forfeited.",
+    false,
+    11,
+    3,
+  );
   writeGap(4);
 
   writeLine("SIGNATURES", true);
@@ -145,13 +194,19 @@ export function generateExtensionPDF(a: DbAgreement) {
 
   const colW = (TEXT_W - 10) / 2;
   const sigY = y;
-  doc.text("PG Owner: ______________________", LEFT, y); y += LH;
-  doc.text(`Name: ${blank(a.owner_name)}`, LEFT, y); y += LH;
-  doc.text("Date: ______________________", LEFT, y); y += LH;
+  doc.text("PG Owner: ______________________", LEFT, y);
+  y += LH;
+  doc.text(`Name: ${blank(a.owner_name)}`, LEFT, y);
+  y += LH;
+  doc.text("Date: ______________________", LEFT, y);
+  y += LH;
   y = sigY;
-  doc.text("Student: ______________________", LEFT + colW + 10, y); y += LH;
-  doc.text(`Name: ${blank(a.student_name)}`, LEFT + colW + 10, y); y += LH;
-  doc.text("Date: ______________________", LEFT + colW + 10, y); y += LH;
+  doc.text("Student: ______________________", LEFT + colW + 10, y);
+  y += LH;
+  doc.text(`Name: ${blank(a.student_name)}`, LEFT + colW + 10, y);
+  y += LH;
+  doc.text("Date: ______________________", LEFT + colW + 10, y);
+  y += LH;
 
   y += 6;
   const witY = y;
@@ -195,10 +250,12 @@ export function generateExitPDF(a: DbAgreement) {
     doc.setFontSize(11);
   };
 
-  const writeGap = (g = 2) => { y += g; };
+  const writeGap = (g = 2) => {
+    y += g;
+  };
 
   // ─── PAGE 1: Vacating Letter ───
-  let y = FIRST_TOP;
+  let y = 25;
 
   y = writeHeader(doc, y);
 
@@ -224,16 +281,30 @@ export function generateExitPDF(a: DbAgreement) {
   writeLine("Respected Sir,");
   writeGap();
 
-  writeLine(`I, ${blank(a.student_name)}, was residing in Room No ${blank(a.room_number)} at Madilu PG Accommodation since ${fmtDate(a.start_date)}.`);
+  writeLine(
+    `I, ${blank(a.student_name)}, was residing in Room No ${blank(a.room_number)} at Madilu PG Accommodation since ${fmtDate(a.start_date)}.`,
+  );
   writeGap();
 
-  writeLine("I hereby confirm that I am vacating the PG premises on ____________ due to ____________.");
+  writeLine(
+    "I hereby confirm that I am vacating the PG premises on ____________ due to ____________.",
+  );
   writeGap();
 
   writeLine("I declare that:", true);
-  writeLine("1. All dues cleared: Rent and maintenance paid up to ____________. No pending dues.", false, 11, 3);
+  writeLine(
+    "1. All dues cleared: Rent and maintenance paid up to ____________. No pending dues.",
+    false,
+    11,
+    3,
+  );
   writeLine("2. Room & Property: Room, keys, ID card handed over in good condition.", false, 11, 3);
-  writeLine(`3. Security Deposit: Kindly refund Rs. ${inr(a.security_deposit)}/- to UPI/Bank A/c: ____________ after deducting damages, if any.`, false, 11, 3);
+  writeLine(
+    `3. Security Deposit: Kindly refund Rs. ${inr(a.security_deposit)}/- to UPI/Bank A/c: ____________ after deducting damages, if any.`,
+    false,
+    11,
+    3,
+  );
   writeGap(3);
 
   writeLine("I request you to issue a No-Dues Certificate and confirm my exit.");
@@ -247,7 +318,7 @@ export function generateExitPDF(a: DbAgreement) {
 
   // ─── PAGE 2: No-Dues Certificate + Checklist ───
   doc.addPage();
-  y = FIRST_TOP;
+  y = 25;
 
   y = writeHeader(doc, y);
 
@@ -259,13 +330,17 @@ export function generateExitPDF(a: DbAgreement) {
   doc.setFontSize(11);
   y += 8;
 
-  writeLine(`This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ${blank(a.room_number)} has vacated Madilu PG Accommodation on ____________.`);
+  writeLine(
+    `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ${blank(a.room_number)} has vacated Madilu PG Accommodation on ____________.`,
+  );
   writeGap();
 
   writeLine("All dues cleared / adjusted.");
   writeGap();
 
-  writeLine(`Security Deposit of Rs. ${inr(a.security_deposit)}/- has been refunded / adjusted on ____________.`);
+  writeLine(
+    `Security Deposit of Rs. ${inr(a.security_deposit)}/- has been refunded / adjusted on ____________.`,
+  );
   writeGap();
 
   writeLine("No further claims from either side.");
@@ -273,7 +348,11 @@ export function generateExitPDF(a: DbAgreement) {
 
   doc.setFont("times", "italic");
   doc.setFontSize(10);
-  writeLine("Note: For students exiting before 12 months, security deposit forfeited as per Extension Agreement Clause 6.", false, 10);
+  writeLine(
+    "Note: For students exiting before 12 months, security deposit forfeited as per Extension Agreement Clause 6.",
+    false,
+    10,
+  );
   doc.setFont("times", "normal");
   doc.setFontSize(11);
   writeGap(4);
