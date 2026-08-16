@@ -330,6 +330,20 @@ export function generateExitPDF(a: DbAgreement) {
   doc.setFontSize(11);
   y += 8;
 
+  writeLine(
+    `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ____________ has vacated Madilu PG Accommodation on ____________.`,
+  );
+  writeGap();
+
+  writeLine("All dues cleared / adjusted.");
+  writeGap();
+
+  writeLine("Security Deposit of Rs. ____________ has been refunded / adjusted on ____________.");
+  writeGap();
+
+  writeLine("No further claims from either side.");
+  writeGap(3);
+
   doc.setFont("times", "italic");
   doc.setFontSize(10);
   writeLine(
@@ -366,19 +380,12 @@ export function generateExitPDF(a: DbAgreement) {
     y += LH + 2;
   }
 
+  y += 10;
+  const boxStartY = y;
+  const boxPad = 5;
   const boxX = LEFT;
   const boxW = TEXT_W;
-  const boxH = 52;
-  const boxPad = 5;
-  let boxY = y + 8;
-
-  if (boxY + boxH > PAGE_H - BOTTOM) {
-    doc.addPage();
-    boxY = TOP;
-  }
-
-  doc.rect(boxX, boxY, boxW, boxH);
-  const certLines = [
+  const boxLines = [
     `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ____________ has vacated Madilu PG Accommodation on ____________.`,
     "",
     "All dues cleared / adjusted.",
@@ -386,23 +393,53 @@ export function generateExitPDF(a: DbAgreement) {
     "Security Deposit of Rs. ____________ has been refunded / adjusted on ____________.",
     "",
     "No further claims from either side.",
+    "",
+    "Seal & Signature of Madilu PG Accommodation: ______________________",
   ];
 
-  let certCursorY = boxY + boxPad + 3;
-  for (const line of certLines) {
+  let boxLineCount = 0;
+  for (const line of boxLines) {
     const wrapped = doc.splitTextToSize(line, boxW - boxPad * 2);
-    for (const wrappedLine of wrapped) {
-      doc.text(wrappedLine, boxX + boxPad, certCursorY);
-      certCursorY += 5.2;
-    }
-    if (line === "") {
-      certCursorY += 1;
-    }
+    boxLineCount += wrapped.length;
   }
 
-  const sealLineY = boxY + boxH - 12;
-  doc.text("Seal & Signature of Madilu PG Accommodation", boxX + boxPad, sealLineY);
-  doc.line(boxX + 60, sealLineY + 7, boxX + boxW - 25, sealLineY + 7);
+  const linesHeight = boxLineCount * 5.2;
+  const boxHeight = Math.max(48, linesHeight + boxPad * 2 + 10);
+  const bottomBoxY = boxStartY + 0;
+
+  if (bottomBoxY + boxHeight > PAGE_H - BOTTOM) {
+    doc.addPage();
+    y = TOP;
+    const nextBoxStartY = TOP;
+    doc.rect(boxX, nextBoxStartY, boxW, boxHeight);
+    let certCursorY = nextBoxStartY + boxPad + 4;
+    for (const line of boxLines) {
+      const wrapped = doc.splitTextToSize(line, boxW - boxPad * 2);
+      for (const wrappedLine of wrapped) {
+        doc.text(wrappedLine, boxX + boxPad, certCursorY);
+        certCursorY += 5.2;
+      }
+      if (line === "") certCursorY += 1;
+    }
+    doc.line(
+      boxX + 60,
+      nextBoxStartY + boxHeight - 10,
+      boxX + boxW - 20,
+      nextBoxStartY + boxHeight - 10,
+    );
+  } else {
+    doc.rect(boxX, bottomBoxY, boxW, boxHeight);
+    let certCursorY = bottomBoxY + boxPad + 4;
+    for (const line of boxLines) {
+      const wrapped = doc.splitTextToSize(line, boxW - boxPad * 2);
+      for (const wrappedLine of wrapped) {
+        doc.text(wrappedLine, boxX + boxPad, certCursorY);
+        certCursorY += 5.2;
+      }
+      if (line === "") certCursorY += 1;
+    }
+    doc.line(boxX + 60, bottomBoxY + boxHeight - 10, boxX + boxW - 20, bottomBoxY + boxHeight - 10);
+  }
 
   const filename = `Exit_NoDues_${a.student_name.replace(/\s+/g, "_")}_${Date.now()}.pdf`;
   doc.save(filename);
