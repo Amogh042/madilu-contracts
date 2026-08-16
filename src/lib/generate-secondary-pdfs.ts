@@ -330,42 +330,6 @@ export function generateExitPDF(a: DbAgreement) {
   doc.setFontSize(11);
   y += 8;
 
-  const studentCopyBoxX = LEFT;
-  const studentCopyBoxY = y + 2;
-  const studentCopyBoxW = TEXT_W;
-  const studentCopyBoxH = 58;
-  const studentCopyPad = 5;
-
-  doc.rect(studentCopyBoxX, studentCopyBoxY, studentCopyBoxW, studentCopyBoxH);
-  let boxCursorY = studentCopyBoxY + studentCopyPad + 3;
-
-  const studentCopyLines = [
-    `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ____________ has vacated Madilu PG Accommodation on ____________.`,
-    "",
-    "All dues cleared / adjusted.",
-    "",
-    "Security Deposit of Rs. ____________ has been refunded / adjusted on ____________.",
-    "",
-    "No further claims from either side.",
-  ];
-
-  for (const line of studentCopyLines) {
-    const wrapped = doc.splitTextToSize(line, studentCopyBoxW - studentCopyPad * 2);
-    for (const wrappedLine of wrapped) {
-      doc.text(wrappedLine, studentCopyBoxX + studentCopyPad, boxCursorY);
-      boxCursorY += 5.2;
-    }
-    if (line === "") {
-      boxCursorY += 1;
-    }
-  }
-
-  const sealY = studentCopyBoxY + studentCopyBoxH - 12;
-  doc.text("Seal & Signature of Madilu PG Accommodation", studentCopyBoxX + studentCopyPad, sealY);
-  doc.line(studentCopyBoxX + 90, sealY + 7, studentCopyBoxX + studentCopyBoxW - 10, sealY + 7);
-
-  y = studentCopyBoxY + studentCopyBoxH + 8;
-
   doc.setFont("times", "italic");
   doc.setFontSize(10);
   writeLine(
@@ -401,6 +365,44 @@ export function generateExitPDF(a: DbAgreement) {
     doc.text(item, LEFT + 7, y);
     y += LH + 2;
   }
+
+  const boxX = LEFT;
+  const boxW = TEXT_W;
+  const boxH = 52;
+  const boxPad = 5;
+  let boxY = y + 8;
+
+  if (boxY + boxH > PAGE_H - BOTTOM) {
+    doc.addPage();
+    boxY = TOP;
+  }
+
+  doc.rect(boxX, boxY, boxW, boxH);
+  const certLines = [
+    `This is to certify that Mr./Ms. ${blank(a.student_name)}, Room No ____________ has vacated Madilu PG Accommodation on ____________.`,
+    "",
+    "All dues cleared / adjusted.",
+    "",
+    "Security Deposit of Rs. ____________ has been refunded / adjusted on ____________.",
+    "",
+    "No further claims from either side.",
+  ];
+
+  let certCursorY = boxY + boxPad + 3;
+  for (const line of certLines) {
+    const wrapped = doc.splitTextToSize(line, boxW - boxPad * 2);
+    for (const wrappedLine of wrapped) {
+      doc.text(wrappedLine, boxX + boxPad, certCursorY);
+      certCursorY += 5.2;
+    }
+    if (line === "") {
+      certCursorY += 1;
+    }
+  }
+
+  const sealLineY = boxY + boxH - 12;
+  doc.text("Seal & Signature of Madilu PG Accommodation", boxX + boxPad, sealLineY);
+  doc.line(boxX + 60, sealLineY + 7, boxX + boxW - 25, sealLineY + 7);
 
   const filename = `Exit_NoDues_${a.student_name.replace(/\s+/g, "_")}_${Date.now()}.pdf`;
   doc.save(filename);
